@@ -9,7 +9,7 @@ h1{font-size:clamp(1.3rem,4vw,2.1rem);margin:0;line-height:1.2}
 .bar{height:9px;background:#e8edf1;border-radius:20px;overflow:hidden;margin-top:9px}.bar>div{height:100%;background:var(--gold);width:0;transition:width .2s}
 .board-scroll{overflow-x:auto;padding:4px 0 10px}.grid{display:grid;grid-template-columns:repeat(30, minmax(0,1fr));gap:3px;width:min(100%,750px);min-width:600px;margin:8px auto;touch-action:none;user-select:none}
 .cell{aspect-ratio:1;border:0;border-radius:5px;background:#eaf0f4;color:#18364e;font-size:clamp(.65rem,1.8vw,1rem);font-weight:800;cursor:pointer;padding:0;box-shadow:inset 0 -2px 0 #d3dfe7;touch-action:none}
-.cell.selected{background:#f2c75c;color:#172638}.hints{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.cell.selected{background:#f2c75c;color:#172638}.cell{position:relative}.cell-letter{display:block;line-height:1}.cell-count{position:absolute;right:1px;bottom:0px;min-width:9px;padding:0 2px;border-radius:5px;background:#1c587a;color:#fff;font-size:clamp(.42rem,.8vw,.62rem);font-weight:800;line-height:1.25;pointer-events:none}.cell-count:empty{display:none}.hints{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
 .hint{background:#f4f7f9;border-radius:12px;padding:12px}.hint h3{font-size:.94rem;margin:0 0 6px;color:var(--blue)}.hint p{margin:0;font-size:.88rem;line-height:1.5;overflow-wrap:anywhere}
 .locked{color:var(--muted);font-style:italic}.gridstatus{text-align:center;min-height:24px;margin:8px 0 0;font-weight:650;color:var(--blue)}
 .foundlist{display:flex;gap:7px;flex-wrap:wrap}.wordchip{background:#e0f0e9;color:#17513e;border-radius:99px;padding:5px 9px;font-size:.82rem;font-weight:700}.bonuschip{background:#fff1cf;color:#76500a}
@@ -22,7 +22,7 @@ footer{text-align:center;color:var(--muted);font-size:.78rem;padding:16px}
 <div class="board-scroll"><div class="grid" id="grid" aria-label="Letter grid"></div></div><div class="gridstatus" id="status" aria-live="polite"> </div></section>
 <section class="panel"><h2 style="font-size:1.08rem;margin:0 0 12px">Your hints</h2><div class="hints">
 <div class="hint"><h3>10% — Starting letters</h3><p id="hint10" class="locked">Unlocks after 8 words.</p></div>
-<div class="hint"><h3>15% — Letter frequency</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div>
+<div class="hint"><h3>15% — Letter frequency (numbers in grid)</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div>
 <div class="hint"><h3>20% — First-letter clues</h3><p id="hint20" class="locked">Unlocks after 16 words.</p></div>
 </div></section>
 <section class="panel"><h2 style="font-size:1.08rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><div class="foundlist" id="foundlist"><span class="locked"> </span></div></section>
@@ -33,17 +33,21 @@ const BOARD={"grid": [["F", "N", "G", "S", "S", "A", "L", "Y", "M", "N", "Z", "R
 const bonusWordSet=new Set(["FAST","AIR","CAR","BUS","JET","SUN","SEA","SKY","LAND","WATER","WIND","RAIN","SNOW","TREE","HOUSE","HOME","LOVE","LIFE","GOOD","BAD","YES","NO","AND","THE","FOR","NOT","WORD","WORDS","GAME","PLAY","TRAVEL","FLY","FLYING","RUN","RUNS","RUNNING","GO","GOES","GET","GOT","SET","SETS","SAT","SIT","SITS","ATE","EAT","EATS","EATEN","TEA","TEN","NET","TAN","RAT","ART","TAR","EAR","ARE","ERA","SEA","SEE","SEEN","ONE","TWO","TEN","MAN","MEN","WOMAN","DOG","CAT","HAT","BAT","FAN","FUN","FAR","FAT","FIT","FIN","FINE","FIRE","FIRM","FISH","BIRD","BIRDS","BOOK","BOOKS","LOOK","LOOKS","TOOK","TOOL","TOOLS","TOUR","ROAD","ROADS","RAIL","TRAIN","TRAINS","PLANE","PLANES","FLIGHT","FLIGHTS","PORT","STAR","STARS","MOON","MARS","RED","BLUE","GREEN","BLACK","WHITE","OLD","NEW","FASTEN","FASTEST","FASTER","KALT","WARM","WARMER","ALT","NEU","GUT","BESSER","BESTE","TAG","TAGE","NACHT","NACHTS","HAUS","HAUSE","MAUS","MAUSEN","BAUM","BAUMS","WALD","WALDE","WASSER","LUFT","FEUER","ERDE","WELT","MENSCH","MENSCHEN","KIND","KINDER","FRAU","FRAUEN","MANN","MANNER","MÄNNER","FREUND","FREUNDE","FREUNDIN","FREUNDLICH","ESSEN","ISST","Aß","TRINKEN","TRINKT","GEHEN","GEHT","GING","KOMMEN","KOMMT","KAM","MACHEN","MACHT","HABEN","HAT","HATTEN","SEIN","IST","SIND","WAR","WAREN","WIRD","WERDEN","KANN","KÖNNEN","MUSS","MÜSSEN","SOLL","SOLLEN","WOLLEN","WILL","DÜRFEN","DARF","DAS","DER","DIE","DEM","DEN","EIN","EINE","EINER","EINEM","EINEN","UND","ODER","ABER","AUCH","NICHT","MIT","VON","ZU","IM","IN","AN","AUF","AUS","BEI","NACH","VOR","ÜBER","UNTER","HINTER","NEBEN","ZWISCHEN","HIER","DORT","WO","WIE","WAS","WER","WENN","WEIL","DASS","ALS","BIS","SEIT","UM","AM","BIS","JA","NEIN","BITTE","DANKE","HALLO","GUTEN","MORGEN","ABEND","TAG","TAGS","JAHR","JAHRE","ZEIT","ZEITEN","UHR","EURO","GELD","PREIS","PREISE","KOSTEN","KLEIN","GROSS","GROß","GROSSER","KLEINER","SCHNELL","LANGSAM","SCHÖN","GROSS","KURZ","LANG","HOCH","TIEF","LEICHT","SCHWER","HELL","DUNKEL","LAUT","LEISE","STARK","SCHWACH","ALTEN","NEUEN","GUTE","GUTER","GUTES","BLAU","ROT","GRÜN","GELB","WEISS","SCHWARZ","GRAU","BRAUN","ORANGE","VIOLETT","ROSA","LILA","RUND","ECKIG","GERADE","RUNDEN","KREIS","KREISE","LINIE","PUNKT","PUNKTE","ZAHL","ZAHLEN","WORT","WÖRTER","BUCHSTABE","BUCHSTABEN","SPIEL","SPIELE","SPIELEN","SPIELT","GEWINN","GEWINNEN","VERLIEREN","FINDEN","FINDET","FAND","SUCHEN","SUCHT","SUCHEN","LESEN","LIEST","SCHREIBEN","SCHREIBT","SAGEN","SAGT","FRAGEN","FRAGT","ANTWORT","ANTWORTEN","HÖREN","HÖRT","SEHEN","SIEHT","ZEIGEN","ZEIGT","DENKEN","DENKT","WISSEN","WEISS","KENNEN","KENNT","LERNEN","LERNT","ARBEIT","ARBEITEN","ARBEITET","REISEN","REIST","REISE","REISEN","FLUG","FLÜGE","FLUGHAFEN","FLUGHÄFEN","FLIEGEN","FLIEGT","PILOT","PILOTEN","GAST","GÄSTE","HOTEL","ZIMMER","STADT","STÄDTE","LAND","LÄNDER","ORT","ORTE","PLATZ","PLÄTZE","STRASSE","STRASSEN","BAHNHOF","BAHN","BUSSE","AUTO","AUTOS","FAHRRAD","FAHRRÄDER","SCHIFF","SCHIFFE","MEER","SEE","INSEL","INSELN","BERG","BERGE","TAL","TÄLER","FLUSS","FLÜSSE","BRÜCKE","BRÜCKEN","PARK","PARKS","GARTEN","GÄRTEN","BLUME","BLUMEN","GRAS","STEIN","STEINE","SAND","KIES","HOLZ","METALL","PAPIER","GLAS","TISCH","STUHL","STÜHLE","BETT","BETTEN","TÜR","TÜREN","FENSTER","WAND","WÄNDE","DACH","DÄCHER","BODEN","DECKE","LAMPE","LICHT","LICHTER","LAMPE","STROM","KABEL","HAND","HÄNDE","FUSS","FÜSSE","KOPF","HAAR","HAARE","AUGE","AUGEN","OHR","OHREN","NASE","MUND","ZAHN","ZÄHNE","HERZ","BLUT","ARM","ARME","BEIN","BEINE","RÜCKEN","BAUCH","HALS","HAUT","KÖRPER","GESUND","KRANK","MÜDE","WACH","HUNGRIG","DURSTIG","GLÜCK","GLÜCKLICH","TRAURIG","FROH","WÜTEND","RUHIG","FREI","OFFEN","ZU","VOLL","LEER","REICH","ARM","TEUER","BILLIG","SCHNELL","LANGSAM","RICHTIG","FALSCH","WAHR","Klar","KLAR","SICHER","UNSICHER","EINFACH","SCHWIERIG","WICHTIG","MÖGLICH","UNMÖGLICH","GENAU","FAST","MEHR","WENIGER","VIEL","VIELE","WENIG","ALLE","JEDER","JEDEN","JEDES","MANCH","MANCHMAL","IMMER","NIE","OFT","SELTEN","HEUTE","GESTERN","MORGEN","JETZT","BALD","SPÄTER","FRÜHER","ZUERST","DANN","DANACH","WIEDER","NOCH","SCHON","GERADE","NUR","ERST","SEHR","GANZ","ZUSAMMEN","ALLEIN","WIR","IHR","SIE","ER","ES","ICH","DU","MICH","DICH","UNS","EUCH","IHN","IHM","IHRER","MEIN","DEIN","SEIN","UNSER","EUER","DIESER","JENER","WELCHER","WELCHE","WELCHES","DIESE","DIESES","DIESEM","DIESEN","JENE","JENES","JENEM","JENEN"]);
 const normalizeBonusWord=w=>String(w).toUpperCase().replace(/Ä/g,"AE").replace(/Ö/g,"OE").replace(/Ü/g,"UE").replace(/ẞ/g,"SS").replace(/ß/g,"SS").replace(/[^A-Z]/g,"");
 let bonusDictionaryReady=false;
-Promise.allSettled([fetch("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt").then(r=>r.ok?r.text():Promise.reject()),fetch("https://raw.githubusercontent.com/Jonny-exe/German-Words-Library/master/German-words-5000-words.json").then(r=>r.ok?r.json():Promise.reject())]).then(results=>{
+Promise.allSettled([fetch("https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt").then(r=>r.ok?r.text():Promise.reject()),fetch("https://raw.githubusercontent.com/marekventur/spielwoerter/main/wordlist_accepted.jsonl").then(r=>r.ok?r.text():Promise.reject())]).then(results=>{
  if(results[0].status==="fulfilled")results[0].value.split(/\s+/).forEach(w=>{if(/^[a-z]{3,20}$/i.test(w))bonusWordSet.add(normalizeBonusWord(w))});
- if(results[1].status==="fulfilled")results[1].value.forEach(w=>{if(typeof w==="string"&&w.length>=3)bonusWordSet.add(normalizeBonusWord(w))});
+ if(results[1].status==="fulfilled")results[1].value.split(/\r?\n/).forEach(line=>{if(!line.trim())return;try{const entry=JSON.parse(line);const w=entry.word;if(typeof w==="string"&&w.length>=3&&w.length<=30&&/^[a-zäöüß]+$/i.test(w))bonusWordSet.add(normalizeBonusWord(w))}catch(e){}});
  bonusDictionaryReady=true;
 });
 let path=[],dragging=false;
 const $=id=>document.getElementById(id);
+const SAVE_KEY='joerg-aviation-challenge-single-v1';
+function loadSavedGame(){try{const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!saved)return;const valid=new Set(WORDS);(saved.found||[]).forEach(w=>{if(valid.has(w))found.add(w)});(saved.bonusFound||[]).forEach(w=>{if(typeof w==='string')bonusFound.add(w)});}catch(e){console.warn('Saved game could not be read.',e)}}
+function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({found:[...found],bonusFound:[...bonusFound],savedAt:Date.now()}));}catch(e){console.warn('Game progress could not be saved.',e)}}
+loadSavedGame();
 function drawGrid(){const el=$('grid');el.innerHTML='';BOARD.grid.forEach((row,r)=>row.forEach((letter,c)=>{
- const b=document.createElement('button');b.className='cell';b.type='button';b.textContent=letter;b.dataset.r=r;b.dataset.c=c;
+ const b=document.createElement('button');b.className='cell';b.type='button';b.innerHTML=`<span class=\"cell-letter\">${letter}</span><span class=\"cell-count\" aria-hidden=\"true\"></span>`;b.dataset.r=r;b.dataset.c=c;
  el.appendChild(b);
-}))}
+}));refreshGridCounts(WORDS.filter(w=>!found.has(w)))}
 function addCell(r,c){const last=path[path.length-1];if(path.some(p=>p.r===r&&p.c===c))return;if(Math.abs(last.r-r)<=1&&Math.abs(last.c-c)<=1){path.push({r,c});paint()}}
 function paint(){document.querySelectorAll('.cell').forEach(el=>el.classList.toggle('selected',path.some(p=>p.r===+el.dataset.r&&p.c===+el.dataset.c)));$('status').textContent=path.map(p=>BOARD.grid[p.r][p.c]).join('')}
 function finish(){if(!dragging)return;dragging=false;const raw=path.map(p=>BOARD.grid[p.r][p.c]).join(''),rev=[...raw].reverse().join(''),word=wordSet.has(raw)?raw:wordSet.has(rev)?rev:null;
@@ -57,7 +61,21 @@ $('grid').addEventListener('pointerdown',e=>{const cell=e.target.closest&&e.targ
 document.addEventListener('pointermove',e=>{if(!dragging||e.pointerId!==activePointer)return;e.preventDefault();const cell=cellFromPoint(e.clientX,e.clientY);if(cell)addCell(cell.r,cell.c)},{passive:false});
 document.addEventListener('pointerup',e=>{if(!dragging||e.pointerId!==activePointer)return;activePointer=null;finish()});
 document.addEventListener('pointercancel',e=>{if(!dragging||e.pointerId!==activePointer)return;activePointer=null;dragging=false;path=[];drawGrid()});
-function update(){const n=found.size,pct=Math.round(n/TOTAL*100),remaining=WORDS.filter(w=>!found.has(w));$('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`; $('progress').style.width=pct+'%';
+function gridHintCounts(remaining){
+ const counts={};
+ if(found.size>=12){remaining.forEach(w=>[...w].forEach(ch=>counts[ch]=(counts[ch]||0)+1));}
+ else if(found.size>=8){remaining.forEach(w=>counts[w[0]]=(counts[w[0]]||0)+1);}
+ return counts;
+}
+function refreshGridCounts(remaining){
+ const counts=gridHintCounts(remaining);
+ document.querySelectorAll('#grid .cell').forEach(cell=>{
+  const letter=cell.querySelector('.cell-letter')?.textContent||'';
+  const badge=cell.querySelector('.cell-count');
+  if(badge)badge.textContent=counts[letter]||'';
+ });
+}
+function update(){saveGame();const n=found.size,pct=Math.round(n/TOTAL*100),remaining=WORDS.filter(w=>!found.has(w));refreshGridCounts(remaining);$('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`; $('progress').style.width=pct+'%';
  if(n>=8){const counts={};remaining.forEach(w=>counts[w[0]]=(counts[w[0]]||0)+1);$('hint10').className='';$('hint10').textContent=Object.keys(counts).sort().map(k=>`${k}: ${counts[k]}`).join(' · ')||'All words found!'}
  if(n>=12){const f={};remaining.forEach(w=>[...w].forEach(ch=>f[ch]=(f[ch]||0)+1));$('hint15').className='';$('hint15').textContent=Object.keys(f).sort().map(k=>`${k}: ${f[k]}`).join(' · ')||'All words found!'}
  if(n>=16){$('hint20').className='';$('hint20').textContent=remaining.map(w=>w[0]).sort().join(' · ')||'All words found!'}
