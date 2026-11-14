@@ -34,9 +34,6 @@ let path=[],dragging=false;
 const $=id=>document.getElementById(id);
 function drawGrid(){const el=$('grid');el.innerHTML='';BOARD.grid.forEach((row,r)=>row.forEach((letter,c)=>{
  const b=document.createElement('button');b.className='cell';b.type='button';b.textContent=letter;b.dataset.r=r;b.dataset.c=c;
- b.addEventListener('pointerdown',e=>{e.preventDefault();dragging=true;path=[{r,c}];paint()});
- b.addEventListener('pointerenter',()=>{if(dragging)addCell(r,c)});
- b.addEventListener('click',()=>{if(!dragging){path=[{r,c}];paint()}});
  el.appendChild(b);
 }))}
 function addCell(r,c){const last=path[path.length-1];if(path.some(p=>p.r===r&&p.c===c))return;if(Math.abs(last.r-r)<=1&&Math.abs(last.c-c)<=1){path.push({r,c});paint()}}
@@ -46,7 +43,12 @@ function finish(){if(!dragging)return;dragging=false;const raw=path.map(p=>BOARD
  else if(word){$('status').textContent=word+' is already found.'}
  else if(raw.length>1){$('status').textContent=raw+' — not on the list.'}
  path=[];drawGrid()}
-document.addEventListener('pointerup',finish);
+let activePointer=null;
+function cellFromPoint(x,y){const node=document.elementFromPoint(x,y);const cell=node&&node.closest?node.closest('.cell'):null;return cell&&$('grid').contains(cell)?{r:+cell.dataset.r,c:+cell.dataset.c}:null}
+$('grid').addEventListener('pointerdown',e=>{const cell=e.target.closest&&e.target.closest('.cell');if(!cell)return;e.preventDefault();dragging=true;activePointer=e.pointerId;path=[{r:+cell.dataset.r,c:+cell.dataset.c}];paint()});
+document.addEventListener('pointermove',e=>{if(!dragging||e.pointerId!==activePointer)return;e.preventDefault();const cell=cellFromPoint(e.clientX,e.clientY);if(cell)addCell(cell.r,cell.c)},{passive:false});
+document.addEventListener('pointerup',e=>{if(!dragging||e.pointerId!==activePointer)return;activePointer=null;finish()});
+document.addEventListener('pointercancel',e=>{if(!dragging||e.pointerId!==activePointer)return;activePointer=null;dragging=false;path=[];drawGrid()});
 function update(){const n=found.size,pct=Math.round(n/TOTAL*100),remaining=WORDS.filter(w=>!found.has(w));$('stats').textContent=`${n} / ${TOTAL} words found · ${pct}%`;$('progress').style.width=pct+'%';
  if(n>=8){const counts={};remaining.forEach(w=>counts[w[0]]=(counts[w[0]]||0)+1);$('hint10').className='';$('hint10').textContent=Object.keys(counts).sort().map(k=>`${k}: ${counts[k]}`).join(' · ')||'All words found!'}
  if(n>=12){const f={};remaining.forEach(w=>[...w].forEach(ch=>f[ch]=(f[ch]||0)+1));$('hint15').className='';$('hint15').textContent=Object.keys(f).sort().map(k=>`${k}: ${f[k]}`).join(' · ')||'All words found!'}
