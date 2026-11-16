@@ -1,12 +1,80 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><title>Jörg's Aviation and Travel Challenge</title>
 <style>
 :root{--navy:#102b45;--blue:#1c587a;--gold:#e7b64d;--paper:#f4f6f8;--ink:#172638;--muted:#627487}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif}header{background:linear-gradient(125deg,#102b45,#1c587a);color:white;padding:25px 18px 22px;text-align:center}h1{font-size:clamp(1.35rem,4vw,2.2rem);margin:0 auto 8px;max-width:850px;line-height:1.15}header p{margin:0;color:#e0eaf1}.wrap{max-width:950px;margin:18px auto;padding:0 14px}.welcome,.panel{background:white;border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 3px 14px #102b4510}.welcome{border-left:5px solid var(--gold)}.welcome strong{color:var(--blue)}.topline{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{border:1px solid #cbd5df;background:white;color:var(--navy);border-radius:999px;padding:9px 14px;font-weight:700;cursor:pointer}.tab.active{background:var(--navy);color:white}.stats{font-weight:700;color:var(--blue)}.bar{height:9px;background:#e8edf1;border-radius:20px;overflow:hidden;margin-top:8px}.bar>div{height:100%;background:var(--gold);width:0;transition:width .2s}.instructions{font-size:.94rem;color:var(--muted);margin:10px 0 14px}.grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;max-width:560px;margin:auto;touch-action:none;user-select:none}.cell{aspect-ratio:1;border:0;border-radius:7px;background:#eaf0f4;color:#18364e;font-size:clamp(.75rem,2.7vw,1.35rem);font-weight:800;cursor:pointer;padding:0;box-shadow:inset 0 -2px 0 #d3dfe7;touch-action:none}.cell.selected{background:#f2c75c;color:#172638}.cell{position:relative}.cell-letter{display:block;line-height:1}.cell-count{position:absolute;bottom:1px;min-width:7px;padding:0 2px;border-radius:4px;background:#547286;color:#fff;font-size:clamp(.34rem,.58vw,.48rem);font-weight:600;line-height:1.15;opacity:.82;pointer-events:none}.cell-count.start-count{left:2px}.cell-count.frequency-count{right:2px;background:#547286}.cell-count:empty{display:none}.hints{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.hint{background:#f4f7f9;border-radius:12px;padding:12px}.hint h3{font-size:.96rem;margin:0 0 6px;color:var(--blue)}.hint p{margin:0;font-size:.9rem;line-height:1.55;overflow-wrap:anywhere}.locked{color:var(--muted);font-style:italic}.gridstatus{text-align:center;min-height:24px;margin:12px 0 0;font-weight:650;color:var(--blue)}.foundlist{display:flex;gap:7px;flex-wrap:wrap}.wordchip{background:#e0f0e9;color:#17513e;border-radius:99px;padding:5px 9px;font-size:.82rem;font-weight:700}.bonuschip{background:#fff1cf;color:#76500a}.complete{display:none;text-align:center;background:#fff8e6;border:1px solid #f0d58f;border-radius:16px;padding:22px;margin:14px 0}.complete h2{margin:0 0 8px;color:#785514}footer{text-align:center;color:var(--muted);font-size:.78rem;padding:18px}@media(max-width:500px){.wrap{padding:0 9px}.grid{gap:3px}.cell{border-radius:5px}.welcome,.panel{padding:13px}}
+
+/* Account and visual refresh */
+:root{--navy:#142d43;--blue:#24627a;--gold:#e6b85c;--paper:#f2f5f7;--ink:#182a38;--muted:#657887;--accent:#287c83;--tile:#e7eff1}
+body{background:radial-gradient(ellipse at 50% -15%,#e2edf0 0,transparent 48%),var(--paper)}
+header{background:linear-gradient(125deg,#142d43 0%,#1e526c 58%,#287c83 100%);box-shadow:0 5px 22px #142d4320}
+.panel{border:1px solid #e3eaee;box-shadow:0 8px 26px #17384b0c;border-radius:18px}
+.grid{gap:5px}
+.cell{background:var(--tile);color:#17394b;border-radius:8px;box-shadow:inset 0 -2px 0 #cbdadd,0 1px 2px #183b4b0a;transition:background .12s,transform .12s,box-shadow .12s}
+.cell:nth-child(4n),.cell:nth-child(4n+1){background:#edf2f3}
+.cell:hover{background:#dce9eb}
+.cell.selected{background:#f3c65f;color:#1e2d36;box-shadow:inset 0 -3px 0 #d49e31,0 0 0 2px #fff7df;transform:scale(.97)}
+.cell-count{background:#376b78;opacity:.9}
+.cell-count.frequency-count{background:#687c91}
+.hint{background:linear-gradient(145deg,#f5f8f9,#edf3f4);border:1px solid #e5edef}
+.hint h3{color:#245d70}
+.tab{border-color:#cbd9df;background:#f7fafb;color:#24495b;transition:.15s}
+.tab.active{background:var(--accent);border-color:var(--accent);color:white;box-shadow:0 3px 9px #287c8330}
+.wordchip{background:#dcefe8;color:#145b45}
+.bonuschip{background:#fff0cb;color:#77520b}
+.bar{background:#e2e9ec}
+.bar>div{background:linear-gradient(90deg,#e5b34d,#e8ce82)}
+.account-panel summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;list-style:none;font-weight:750;color:#244f63}
+.account-panel summary::-webkit-details-marker{display:none}
+.account-panel summary:after{content:"＋";color:var(--accent);font-size:1.2rem}
+.account-panel details[open] summary:after{content:"−"}
+.account-status{font-size:.8rem;font-weight:600;color:var(--muted)}
+.account-content{padding-top:14px}
+.account-intro{margin:0 0 12px;color:var(--muted);font-size:.92rem}
+.account-form{display:grid;gap:7px;max-width:440px}
+.account-form label{font-size:.85rem;font-weight:650;color:#38586a}
+.account-form input{width:100%;border:1px solid #cbd9df;border-radius:9px;padding:10px 11px;font:inherit;background:#fff;color:var(--ink)}
+.account-form input:focus{outline:2px solid #9dcbd0;border-color:var(--accent)}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}
+.account-actions button,.account-content>div>button{border:0;border-radius:9px;padding:10px 15px;background:var(--accent);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.account-actions button.secondary,.account-content>div>button.secondary{background:#eaf0f2;color:#31566a;border:1px solid #d4e0e4}
+.account-message{min-height:1.25em;margin:10px 0 0;font-size:.88rem;color:#315d69}
+.signed-in-email{font-weight:650;color:#31566a}
+@media(max-width:500px){.grid{gap:4px}.cell{border-radius:6px}.account-panel summary{align-items:flex-start}.account-status{white-space:nowrap}}
+
+body[data-board='1']{--accent:#9a6840;--tile:#f1ece6}body[data-board='2']{--accent:#6b659d;--tile:#ecebf4}body[data-board='0']{--accent:#287c83;--tile:#e7eff1}
 </style></head><body><header><h1>Jörg's Aviation and Travel Challenge</h1></header><main class="wrap">
 
 <section class="panel"><div class="topline"><div class="tabs" id="tabs"></div><div class="stats" id="stats"></div></div><div class="bar"><div id="progress"></div></div><div class="grid" id="grid" aria-label="Letter grid"></div><div class="gridstatus" id="status" aria-live="polite">Find a word to get started!</div></section>
+
+<section class="panel account-panel">
+  <details>
+    <summary><span>Spielstand sichern & auf anderen Geräten weiterspielen</span><span class="account-status" id="accountStatus">Nicht angemeldet</span></summary>
+    <div class="account-content">
+      <p class="account-intro">Mit einem Konto wird dein Spielstand automatisch gespeichert und auf anderen Geräten geladen.</p>
+      <div id="accountSignedOut">
+        <form id="accountForm" class="account-form">
+          <label for="accountEmail">E-Mail-Adresse</label>
+          <input id="accountEmail" type="email" autocomplete="email" required>
+          <label for="accountPassword">Passwort (mindestens 8 Zeichen)</label>
+          <input id="accountPassword" type="password" autocomplete="current-password" minlength="8" required>
+          <div class="account-actions">
+            <button type="submit" id="signInButton">Anmelden</button>
+            <button type="button" class="secondary" id="signUpButton">Konto erstellen</button>
+          </div>
+        </form>
+      </div>
+      <div id="accountSignedIn" hidden>
+        <p id="signedInEmail" class="signed-in-email"></p>
+        <button type="button" class="secondary" id="signOutButton">Abmelden</button>
+      </div>
+      <p id="accountMessage" class="account-message" role="status" aria-live="polite"></p>
+    </div>
+  </details>
+</section>
+</section>
 <section class="panel"><h2 style="font-size:1.1rem;margin:0 0 12px">Your hints</h2><div class="hints"><div class="hint"><h3>10% — Words starting at each square</h3><p id="hint10" class="locked">Unlocks after 8 words.</p></div><div class="hint"><h3>15% — Words using each square</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div><div class="hint"><h3>20% — Word clues</h3><p id="hint20" class="locked">Unlocks after 16 words.</p></div></div></section>
 <section class="panel"><h2 style="font-size:1.1rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><div class="foundlist" id="foundlist"><span class="locked">Your discoveries will appear here.</span></div></section>
 <section class="complete" id="complete"><h2>All words found!</h2><p>All 77 words have been discovered. Well done!</p></section></main><footer>Jörg's Aviation and Travel Challenge</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const BOARDS=[{"grid":[["Z","O","Q","S","O","H","T","T","T","A","P","A","H","I"],["U","Y","W","M","G","J","U","R","M","T","W","P","R","Z"],["D","A","D","K","Z","P","E","U","O","I","A","O","C","E"],["T","A","A","S","I","A","T","N","I","R","N","I","T","T"],["E","A","B","I","N","Y","X","S","A","T","V","U","I","Z"],["F","T","C","G","S","A","C","E","S","L","A","M","O","S"],["H","T","A","I","N","W","R","C","A","U","I","C","N","O"],["A","E","G","U","R","U","G","L","O","A","C","A","L","G"],["R","I","N","G","B","A","L","K","K","I","I","U","A","B"],["T","A","L","I","A","N","U","C","O","P","T","L","T","S"],["E","S","U","E","D","N","H","M","C","G","Z","E","E","S"],["B","R","R","A","S","R","E","D","I","N","F","N","E","L"],["U","F","A","A","R","H","P","H","R","F","D","B","R","T"],["J","C","H","J","H","E","S","T","E","A","O","E","W","A"]],"words":["ANNUAL","AUSTRALIA","AUSTRALIANSHEPHERD","AVIATION","BOARDING","BUCHAREST","CAIRNS","COCKPIT","DATA","FABIA","FREIBURG","GATE","GATHERING","JAHRESTREFFEN","JUTTA","LESSABLONS","LOCSEC","MOUNTAIN","MOUNTAINS","PERTH","PROTECTION","RUNWAY","STLUCIA","WAPPAH","WATERBED"]},{"grid":[["E","U","J","U","E","L","H","H","O","C","Y","O","R","I"],["U","L","M","N","U","B","Z","S","U","R","P","A","T","R"],["T","B","A","K","N","I","U","L","K","S","U","S","I","A"],["A","T","G","Q","L","F","W","B","Y","E","S","E","G","K"],["L","A","R","O","I","X","O","R","D","D","Y","N","U","B"],["E","M","O","Y","N","K","I","M","R","N","A","S","A","S"],["Q","I","L","P","T","C","A","A","E","L","P","F","I","H"],["U","A","R","I","A","E","F","Y","Y","H","U","E","T","N"],["B","L","E","R","G","L","H","I","L","O","O","H","E","S"],["A","L","A","D","R","C","Y","O","N","A","K","S","S","A"],["L","O","N","U","G","S","B","P","E","G","O","G","L","O"],["U","E","T","O","B","A","I","B","M","L","A","N","Q","C"],["E","P","M","E","A","R","T","A","Y","I","S","U","B","S"],["L","T","R","C","G","A","N","S","A","T","I","N","E","S"]],"words":["AIRBUS","AIRPORT","AUSSIE","BALLARAT","BENNI","BLUE","BUSINESS","BUSINESSCLASS","CARIBBEAN","CHECKIN","EMAG","FLYING","GUADELOUPE","HONGKONG","HORSE","LUCY","LUFTHANSA","MALTA","OERTEL","POLYAMORY","PORTIRAGNE","QUALITY","QUALITYMANAGEMENT","SHEPHERD","STRASBOURG","SYDNEY"]},{"grid":[["Q","L","F","U","L","A","G","T","X","Z","X","W","F","N"],["W","B","U","M","M","B","Q","A","S","F","D","C","H","K"],["G","U","I","D","E","U","Y","N","F","I","R","A","O","J"],["S","B","D","B","R","O","V","D","Y","G","R","E","C","K"],["A","N","Y","U","L","O","X","B","R","A","N","N","E","B"],["F","V","E","N","A","F","P","W","R","U","J","I","G","O"],["A","M","I","L","S","E","N","M","E","L","P","N","K","W"],["R","O","A","N","T","M","G","R","B","A","G","O","I","S"],["U","T","H","B","E","M","A","N","U","O","C","O","E","T"],["K","N","A","Y","R","S","A","S","D","A","M","S","O","A"],["F","R","F","O","R","P","A","S","E","N","B","B","W","K"],["H","U","B","C","R","T","A","D","A","F","L","A","R","S"],["R","D","A","K","O","T","L","C","T","I","L","C","U","T"],["T","U","O","S","S","I","E","C","I","O","N","B","A","S"]],"words":["AUSTRALIAN","AYERSROCK","BARBADOS","BLUEMOUNTAINS","BMAG","BOEING","CARDIFF","CLASS","COOKING","DATAPROTECTION","EUROPEAN","FABI","FRANKFURT","JANINE","JOERG","KATOOMBA","MANAGEMENT","MELBOURNE","MENSA","OXFORD","ROCK","SILDENAFIL","SINGAPUR","STANDBY","TRAVEL","WIESBADEN"]}],TOTAL=BOARDS.reduce((n,b)=>n+b.words.length,0),allWords=new Set(BOARDS.flatMap(b=>b.words)),found=new Set(),bonusFound=new Set();
 const bonusWordSet=new Set(["FAST","AIR","CAR","BUS","JET","SUN","SEA","SKY","LAND","WATER","WIND","RAIN","SNOW","TREE","HOUSE","HOME","LOVE","LIFE","GOOD","BAD","YES","NO","AND","THE","FOR","NOT","WORD","WORDS","GAME","PLAY","TRAVEL","FLY","FLYING","RUN","RUNS","RUNNING","GO","GOES","GET","GOT","SET","SETS","SAT","SIT","SITS","ATE","EAT","EATS","EATEN","TEA","TEN","NET","TAN","RAT","ART","TAR","EAR","ARE","ERA","SEE","SEEN","ONE","TWO","MAN","MEN","WOMAN","DOG","CAT","HAT","BAT","FAN","FUN","FAR","FAT","FIT","FIN","FINE","FIRE","FIRM","FISH","BIRD","BIRDS","BOOK","BOOKS","LOOK","LOOKS","TOOK","TOOL","TOOLS","TOUR","ROAD","ROADS","RAIL","TRAIN","TRAINS","PLANE","PLANES","FLIGHT","FLIGHTS","PORT","STAR","STARS","MOON","MARS","RED","BLUE","GREEN","BLACK","WHITE","OLD","NEW","FASTEN","FASTEST","FASTER","KALT","WARM","ALT","NEU","GUT","BESSER","BESTE","TAG","TAGE","NACHT","NACHTS","HAUS","MAUS","BAUM","WALD","WASSER","LUFT","FEUER","ERDE","WELT","MENSCH","MENSCHEN","KIND","KINDER","FRAU","FRAUEN","MANN","FREUND","FREUNDE","ESSEN","ISST","TRINKEN","TRINKT","GEHEN","GEHT","KOMMEN","KOMMT","MACHEN","MACHT","HABEN","HAT","SEIN","IST","SIND","WAR","WIRD","WERDEN","KANN","MUSS","SOLL","WILL","DAS","DER","DIE","DEM","DEN","EIN","EINE","EINER","UND","ODER","ABER","AUCH","NICHT","MIT","VON","ZU","IM","IN","AN","AUF","AUS","BEI","NACH","VOR","ÜBER","UNTER","HIER","DORT","WO","WIE","WAS","WER","WENN","WEIL","DASS","ALS","BIS","SEIT","UM","AM","JA","NEIN","BITTE","DANKE","HALLO","MORGEN","ABEND","JAHR","ZEIT","UHR","EURO","GELD","PREIS","KOSTEN","KLEIN","GROSS","SCHNELL","LANGSAM","SCHÖN","KURZ","LANG","HOCH","TIEF","LEICHT","SCHWER","HELL","DUNKEL","LAUT","LEISE","STARK","SCHWACH","BLAU","ROT","GRÜN","GELB","WEISS","SCHWARZ","GRAU","BRAUN","RUND","KREIS","LINIE","PUNKT","ZAHL","ZAHLEN","WORT","WÖRTER","BUCHSTABE","BUCHSTABEN","SPIEL","SPIELE","SPIELEN","GEWINN","FINDEN","SUCHEN","LESEN","SCHREIBEN","SAGEN","FRAGEN","ANTWORT","HÖREN","SEHEN","ZEIGEN","DENKEN","WISSEN","KENNEN","LERNEN","ARBEIT","REISEN","REISE","FLUG","FLUGHAFEN","FLIEGEN","PILOT","GAST","HOTEL","ZIMMER","STADT","LAND","ORT","PLATZ","STRASSE","BAHNHOF","BAHN","BUSSE","AUTO","MEER","INSEL","BERG","TAL","FLUSS","BRÜCKE","PARK","GARTEN","BLUME","GRAS","STEIN","SAND","HOLZ","METALL","PAPIER","GLAS","TISCH","STUHL","BETT","TÜR","FENSTER","WAND","DACH","BODEN","LAMPE","LICHT","STROM","KABEL","HAND","FUSS","KOPF","HAAR","AUGE","OHR","NASE","MUND","ZAHN","HERZ","BLUT","ARM","BEIN","RÜCKEN","BAUCH","HALS","HAUT","KÖRPER","GESUND","KRANK","MÜDE","WACH","HUNGRIG","DURSTIG","GLÜCK","GLÜCKLICH","TRAURIG","FROH","WÜTEND","RUHIG","FREI","OFFEN","VOLL","LEER","REICH","TEUER","BILLIG","RICHTIG","FALSCH","WAHR","KLAR","SICHER","EINFACH","SCHWIERIG","WICHTIG","MÖGLICH","GENAU","FAST","MEHR","WENIGER","VIEL","VIELE","WENIG","ALLE","JEDER","MANCH","IMMER","NIE","OFT","SELTEN","HEUTE","GESTERN","JETZT","BALD","SPÄTER","FRÜHER","ZUERST","DANN","DANACH","WIEDER","NOCH","SCHON","NUR","ERST","SEHR","GANZ","ZUSAMMEN","ALLEIN","WIR","IHR","SIE","ER","ES","ICH","DU","MICH","DICH","UNS","EUCH","IHN","IHM","MEIN","DEIN","SEIN","UNSER","EUER","DIESER","JENER","WELCHER","WELCHE","WELCHES","DIESE","DIESES"]);
@@ -16,9 +84,11 @@ Promise.allSettled([fetch("https://raw.githubusercontent.com/dwyl/english-words/
 const $=id=>document.getElementById(id);
 const SAVE_KEY='joerg-aviation-challenge-three-boards-v1';
 function loadSavedGame(){try{const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(!saved)return;const valid=new Set(allWords);(saved.found||[]).forEach(w=>{if(valid.has(w))found.add(w)});(saved.bonusFound||[]).forEach(w=>{if(typeof w==='string')bonusFound.add(w)});if(Number.isInteger(saved.active)&&saved.active>=0&&saved.active<BOARDS.length)active=saved.active;}catch(e){console.warn('Saved game could not be read.',e)}}
-function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({found:[...found],bonusFound:[...bonusFound],active,savedAt:Date.now()}));}catch(e){console.warn('Game progress could not be saved.',e)}}
+function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({found:[...found],bonusFound:[...bonusFound],active,savedAt:Date.now()}));}catch(e){console.warn('Game progress could not be saved.',e)}
+ scheduleCloudSave();
+}
 loadSavedGame();
-function tabs(){ $('tabs').innerHTML=BOARDS.map((b,i)=>`<button class="tab ${i===active?'active':''}" data-i="${i}">Board ${i+1}</button>`).join('');document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{active=+x.dataset.i;path=[];tabs();grid();update();$('status').textContent=`Board ${active+1} — happy hunting!`})}
+function tabs(){ document.body.dataset.board=active; $('tabs').innerHTML=BOARDS.map((b,i)=>`<button class="tab ${i===active?'active':''}" data-i="${i}">Board ${i+1}</button>`).join('');document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{active=+x.dataset.i;path=[];tabs();grid();update();$('status').textContent=`Board ${active+1} — happy hunting!`})}
 function grid(){let el=$('grid');el.innerHTML='';BOARDS[active].grid.forEach((row,r)=>row.forEach((letter,c)=>{let b=document.createElement('button');b.className='cell';b.innerHTML=`<span class=\"cell-letter\">${letter}</span><span class=\"cell-count\" aria-hidden=\"true\"></span>`;b.type='button';b.dataset.r=r;b.dataset.c=c;el.appendChild(b)}));refreshGridCounts([...allWords].filter(w=>!found.has(w)))}
 function add(r,c){let last=path[path.length-1];if(path.length>1&&path[path.length-2].r===r&&path[path.length-2].c===c){path.pop();paint();return}if(path.some(p=>p.r===r&&p.c===c))return;if(last&&Math.abs(last.r-r)<=1&&Math.abs(last.c-c)<=1){path.push({r,c});paint()}}
 function paint(){document.querySelectorAll('.cell').forEach(el=>el.classList.toggle('selected',path.some(p=>p.r===+el.dataset.r&&p.c===+el.dataset.c)));if(path.length)$('status').textContent=path.map(p=>BOARDS[active].grid[p.r][p.c]).join('')}
@@ -69,5 +139,141 @@ if(n>=8){let counts={};remaining.forEach(w=>counts[w[0]]=(counts[w[0]]||0)+1);$(
 if(n>=12){let f={};remaining.forEach(w=>[...w].forEach(ch=>f[ch]=(f[ch]||0)+1));$('hint15').className='';$('hint15').textContent=Object.keys(f).sort().map(k=>`${k}: ${f[k]}`).join(' · ')||'All words found!'}
 if(n>=16){const clues=remaining.map(w=>({word:w,board:BOARDS.findIndex(b=>b.words.includes(w))})).sort((a,b)=>a.word.localeCompare(b.word)).map(x=>`${wordClue(x.word)} — Board ${x.board+1}`);$('hint20').className='';$('hint20').textContent=clues.join(' · ')||'All words found!'}
 $('foundlist').innerHTML=[...found].sort().map(w=>`<span class="wordchip">${w}</span>`).join('')+[...bonusFound].sort().map(w=>`<span class="wordchip bonuschip">★ ${w}</span>`).join('')||'<span class="locked">Your discoveries will appear here.</span>'; if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}}
+
+// Supabase cloud save: local progress is retained as a fallback.
+const SUPABASE_URL = 'https://skipgolsoxdrishuoayq.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ItAf5G79Dpo7v1CyLR0dyA_0piPJR_N';
+const GAME_ID = 'joerg-aviation-shared';
+const OWNER_KEY = SAVE_KEY + ':cloud-owner';
+let cloudClient = null, cloudUser = null, cloudReady = false, cloudSaveTimer = null, cloudUserId = null;
+
+function localSnapshot(){
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch(e) {}
+  return {found:[...found], bonusFound:[...bonusFound], savedAt:Number(saved.savedAt)||0};
+}
+function applySnapshot(data){
+  found.clear(); bonusFound.clear();
+  const valid = new Set(allWords);
+  (Array.isArray(data.found)?data.found:[]).forEach(w=>{if(valid.has(w))found.add(w)});
+  (Array.isArray(data.bonusFound)?data.bonusFound:[]).forEach(w=>{if(typeof w==='string')bonusFound.add(w)});
+  tabs();grid();update();
+}
+function mergeSnapshots(local, remote){
+  return {
+    found:[...new Set([...(local.found||[]),...(remote.found||[])])],
+    bonusFound:[...new Set([...(local.bonusFound||[]),...(remote.bonusFound||[])])],
+    savedAt:Math.max(Number(local.savedAt)||0,Number(remote.savedAt)||0,Date.now())
+  };
+}
+function showAccountMessage(message, isError=false){
+  const el=document.getElementById('accountMessage');
+  if(el){el.textContent=message;el.style.color=isError?'#a33b36':'#315d69';}
+}
+function showAccountUser(user){
+  const signedOut=document.getElementById('accountSignedOut'), signedIn=document.getElementById('accountSignedIn');
+  if(signedOut)signedOut.hidden=!!user;
+  if(signedIn)signedIn.hidden=!user;
+  const status=document.getElementById('accountStatus');
+  if(status)status.textContent=user?'Angemeldet':'Nicht angemeldet';
+  const email=document.getElementById('signedInEmail');
+  if(email)email.textContent=user?user.email:'';
+}
+async function syncCloudNow(){
+  if(!cloudClient||!cloudUser||!cloudReady)return;
+  let snapshot=localSnapshot();
+  // Merge with the latest cloud copy before writing, so progress from another device is not lost.
+  const {data:latest,error:readError}=await cloudClient.from('game_progress').select('payload').eq('user_id',cloudUser.id).eq('game_id',GAME_ID).maybeSingle();
+  if(readError){showAccountMessage('Cloud-Spielstand konnte nicht abgeglichen werden: '+readError.message,true);return;}
+  if(latest?.payload){
+    const merged=mergeSnapshots(snapshot,latest.payload);
+    applySnapshot(merged);
+    clearTimeout(cloudSaveTimer);
+    snapshot=localSnapshot();
+  }
+  const {error}=await cloudClient.from('game_progress').upsert({
+    user_id:cloudUser.id, game_id:GAME_ID, payload:snapshot, updated_at:new Date().toISOString()
+  },{onConflict:'user_id,game_id'});
+  if(error){showAccountMessage('Cloud-Speicherung fehlgeschlagen: '+error.message,true);return;}
+  try{localStorage.setItem(OWNER_KEY,cloudUser.id)}catch(e){}
+  showAccountMessage('Spielstand ist online gesichert.');
+}
+function scheduleCloudSave(){
+  if(!cloudReady||!cloudUser)return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(syncCloudNow,500);
+}
+async function restoreCloudProgress(user){
+  if(!cloudClient||!user)return;
+  if(cloudUserId===user.id&&cloudReady)return;
+  cloudReady=false;cloudUser=user;cloudUserId=user.id;showAccountUser(user);
+  showAccountMessage('Spielstand wird geladen …');
+  const local=localSnapshot();
+  let owner=null;try{owner=localStorage.getItem(OWNER_KEY)}catch(e){}
+  const {data:row,error}=await cloudClient.from('game_progress').select('payload').eq('user_id',user.id).eq('game_id',GAME_ID).maybeSingle();
+  if(error){showAccountMessage('Spielstand konnte nicht geladen werden: '+error.message,true);return;}
+  let result;
+  if(row&&row.payload){
+    if(owner && owner!==user.id){
+      result=row.payload; // Never import another account's local progress.
+    }else{
+      result=mergeSnapshots(local,row.payload);
+    }
+  }else{
+    result=(owner && owner!==user.id)?{found:[],bonusFound:[],active:0,savedAt:Date.now()}:local;
+  }
+  applySnapshot(result);
+  try{localStorage.setItem(OWNER_KEY,user.id)}catch(e){}
+  cloudReady=true;
+  // Pushes the merged legacy/local progress on first login, or refreshes the local cache.
+  if(!row || !owner || owner===user.id) await syncCloudNow();
+  else {
+    try{localStorage.setItem(SAVE_KEY,JSON.stringify(result))}catch(e){}
+    showAccountMessage('Spielstand aus deinem Konto geladen.');
+  }
+}
+async function initCloudAuth(){
+  const status=document.getElementById('accountStatus');
+  if(!window.supabase||!window.supabase.createClient){
+    if(status)status.textContent='Cloud nicht erreichbar';
+    showAccountMessage('Die Anmeldekomponente konnte nicht geladen werden. Bitte Internetverbindung prüfen.',true);return;
+  }
+  cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  document.getElementById('accountForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const email=document.getElementById('accountEmail').value.trim();
+    const password=document.getElementById('accountPassword').value;
+    const btn=document.getElementById('signInButton');btn.disabled=true;
+    const {data,error}=await cloudClient.auth.signInWithPassword({email,password});
+    btn.disabled=false;
+    if(error){showAccountMessage(error.message,true);return;}
+    if(data.user)await restoreCloudProgress(data.user);
+  });
+  document.getElementById('signUpButton').addEventListener('click',async()=>{
+    const email=document.getElementById('accountEmail').value.trim();
+    const password=document.getElementById('accountPassword').value;
+    if(!email||password.length<8){showAccountMessage('Bitte E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben.',true);return;}
+    const btn=document.getElementById('signUpButton');btn.disabled=true;
+    const {data,error}=await cloudClient.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('#')[0]}});
+    btn.disabled=false;
+    if(error){showAccountMessage(error.message,true);return;}
+    if(data.session&&data.user)await restoreCloudProgress(data.user);
+    else showAccountMessage('Fast geschafft: Bitte bestätige deine E-Mail-Adresse. Danach kannst du dich hier anmelden.');
+  });
+  document.getElementById('signOutButton').addEventListener('click',async()=>{
+    const {error}=await cloudClient.auth.signOut();
+    if(error){showAccountMessage(error.message,true);return;}
+    cloudReady=false;cloudUser=null;cloudUserId=null;showAccountUser(null);
+    showAccountMessage('Abgemeldet. Dein lokaler Spielstand bleibt auf diesem Gerät erhalten.');
+  });
+  cloudClient.auth.onAuthStateChange((event,session)=>{
+    if(session?.user)setTimeout(()=>restoreCloudProgress(session.user),0);
+    else if(event==='SIGNED_OUT'){cloudReady=false;cloudUser=null;cloudUserId=null;showAccountUser(null);}
+  });
+  const {data:{session}}=await cloudClient.auth.getSession();
+  if(session?.user)await restoreCloudProgress(session.user);
+}
+
 tabs();grid();update();
+initCloudAuth();
 </script></body></html>
