@@ -161,9 +161,15 @@ footer{color:#7b8298!important;padding:22px!important}
           <div class="account-actions">
             <button type="submit" id="signInButton">Anmelden</button>
             <button type="button" class="secondary" id="signUpButton">Konto erstellen</button>
+            <button type="button" class="account-reset-link" id="forgotPasswordButton">Passwort vergessen?</button>
           </div>
         </form>
       </div>
+      <form id="passwordResetForm" class="account-form" hidden>
+        <label for="newAccountPassword">Neues Passwort (mindestens 8 Zeichen)</label>
+        <input id="newAccountPassword" type="password" autocomplete="new-password" minlength="8" required>
+        <div class="account-actions"><button type="submit">Passwort speichern</button></div>
+      </form>
       <div id="accountSignedIn" hidden>
         <p id="signedInEmail" class="signed-in-email"></p>
         <button type="button" class="secondary" id="signOutButton">Abmelden</button>
@@ -176,7 +182,7 @@ footer{color:#7b8298!important;padding:22px!important}
 <section class="panel"><h2 style="font-size:1.08rem;margin:0 0 12px">Your hints</h2><div class="hints">
 <div class="hint"><h3>10% — Words starting at each square</h3><p id="hint10" class="locked">Unlocks after 8 words.</p></div>
 <div class="hint"><h3>15% — Words using each square</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div>
-<div class="hint"><h3>20% — Word clues</h3><p id="hint20" class="locked">Unlocks after 16 words.</p></div>
+<div class="hint"><h3>20% — Word clues</h3><div id="hint20" class="locked">Unlocks after 16 words.</div></div>
 </div></section>
 <section class="panel"><h2 style="font-size:1.08rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked"> </span></div></section>
 <section class="complete" id="complete"><h2>Mission accomplished, Jörg! 🎉</h2><p>All 77 words found — what a journey! May your next adventures bring wonderful destinations, good company and plenty of unexpected discoveries.</p></section>
@@ -266,15 +272,23 @@ function refreshGridCounts(remaining){
  });
 }
 function wordClue(word){
- const n=word.length;let start=1,end=0;
- if(n>=6)start=2;if(n>=9)end=1;if(n>=12)end=2;if(n>=16)start=3;
+ const n=word.length;const start=n>=6?2:1;const end=n>=12?2:(n>=9?1:0);
  const shown=word.slice(0,start)+(end?word.slice(start,n-end).replace(/./g,'·')+word.slice(n-end):word.slice(start).replace(/./g,'·'));
- return `${shown} (${n})`;
+ return shown;
+}
+function renderWordClues(words,withBoard=false){
+ const groups=new Map();
+ for(const item of words){const word=typeof item==='string'?item:item.word;const n=word.length;if(!groups.has(n))groups.set(n,[]);groups.get(n).push(typeof item==='string'?{word}:{word,board:item.board});}
+ return [...groups.keys()].sort((a,b)=>a-b).map(n=>{
+  const entries=groups.get(n).sort((a,b)=>a.word.localeCompare(b.word));
+  const clues=entries.map(x=>`${wordClue(x.word)}${withBoard?` — Board ${x.board+1}`:''}`).join(' · ');
+  return `<p class="hint-clue-group"><strong>${n} letters:</strong> ${clues}</p>`;
+ }).join('')||'All words found!';
 }
 function update(){saveGame();const n=found.size,pct=Math.round(n/TOTAL*100),remaining=WORDS.filter(w=>!found.has(w));refreshGridCounts(remaining);$('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`; $('progress').style.width=pct+'%';
  if(n>=8){const counts={};remaining.forEach(w=>counts[w[0]]=(counts[w[0]]||0)+1);$('hint10').className='';$('hint10').textContent=Object.keys(counts).sort().map(k=>`${k}: ${counts[k]}`).join(' · ')||'All words found!'}
  if(n>=12){const f={};remaining.forEach(w=>[...w].forEach(ch=>f[ch]=(f[ch]||0)+1));$('hint15').className='';$('hint15').textContent=Object.keys(f).sort().map(k=>`${k}: ${f[k]}`).join(' · ')||'All words found!'}
- if(n>=16){const clues=remaining.slice().sort((a,b)=>a.localeCompare(b)).map(wordClue);$('hint20').className='';$('hint20').textContent=clues.join(' · ')||'All words found!'}
+ if(n>=16){$('hint20').className='';$('hint20').innerHTML=renderWordClues(remaining)}
  $('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">No words found yet.</span>';applyWordHighlight(); 
  if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}}
 
@@ -378,6 +392,26 @@ async function initCloudAuth(){
     showAccountMessage('Die Anmeldekomponente konnte nicht geladen werden. Bitte Internetverbindung prüfen.',true);return;
   }
   cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  const accountDetails=document.querySelector('.account-panel details');
+  document.getElementById('forgotPasswordButton').addEventListener('click',async()=>{
+    const email=document.getElementById('accountEmail').value.trim();
+    if(!email){showAccountMessage('Bitte zuerst deine E-Mail-Adresse eingeben.',true);document.getElementById('accountEmail').focus();return;}
+    const btn=document.getElementById('forgotPasswordButton');btn.disabled=true;
+    const {error}=await cloudClient.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
+    btn.disabled=false;
+    if(error)showAccountMessage('Die E-Mail zum Zurücksetzen konnte nicht gesendet werden: '+error.message,true);
+    else showAccountMessage('Wenn für diese Adresse ein Konto besteht, erhältst du eine E-Mail mit einem Link zum Zurücksetzen des Passworts.');
+  });
+  document.getElementById('passwordResetForm').addEventListener('submit',async e=>{
+    e.preventDefault();const password=document.getElementById('newAccountPassword').value;
+    if(password.length<8){showAccountMessage('Das Passwort muss mindestens 8 Zeichen haben.',true);return;}
+    const {data,error}=await cloudClient.auth.updateUser({password});
+    if(error){showAccountMessage('Das Passwort konnte nicht geändert werden: '+error.message,true);return;}
+    document.getElementById('passwordResetForm').hidden=true;
+    document.getElementById('accountSignedOut').hidden=true;
+    showAccountUser(data.user||cloudUser);showAccountMessage('Passwort geändert. Du kannst das Spiel jetzt wie gewohnt weiterspielen.');
+    if(data.user)await restoreCloudProgress(data.user);
+  });
   document.getElementById('accountForm').addEventListener('submit',async e=>{
     e.preventDefault();
     const email=document.getElementById('accountEmail').value.trim();
@@ -406,6 +440,14 @@ async function initCloudAuth(){
     showAccountMessage('Abgemeldet. Dein lokaler Spielstand bleibt auf diesem Gerät erhalten.');
   });
   cloudClient.auth.onAuthStateChange((event,session)=>{
+    if(event==='PASSWORD_RECOVERY'){
+      if(accountDetails)accountDetails.open=true;
+      document.getElementById('accountSignedOut').hidden=true;
+      document.getElementById('accountSignedIn').hidden=true;
+      document.getElementById('passwordResetForm').hidden=false;
+      showAccountMessage('Bitte vergib jetzt ein neues Passwort.');
+      return;
+    }
     if(session?.user)setTimeout(()=>restoreCloudProgress(session.user),0);
     else if(event==='SIGNED_OUT'){cloudReady=false;cloudUser=null;cloudUserId=null;showAccountUser(null);}
   });
@@ -416,3 +458,15 @@ async function initCloudAuth(){
 drawGrid();update();
 initCloudAuth();
 </script></body></html>
+<style id="requested-readability-adjustments">
+.cell-count{top:auto!important;bottom:2px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5149b7!important;font-size:clamp(.5rem,.78vw,.64rem)!important;line-height:1!important;font-weight:850!important;opacity:1!important;text-shadow:0 1px 2px #fff,0 0 3px #fff!important}
+.cell-count.start-count{left:3px!important;right:auto!important}
+.cell-count.frequency-count{right:3px!important;left:auto!important;color:#168b87!important;background:transparent!important}
+.grid{column-gap:9px!important;row-gap:4px!important}
+@media(max-width:600px){.grid{column-gap:6px!important;row-gap:3px!important}}
+.hint-clue-group{margin:0 0 9px!important;padding:0!important}
+.hint-clue-group:last-child{margin-bottom:0!important}
+.hint-clue-group strong{color:#5149b7;white-space:nowrap}
+.account-reset-link{background:transparent!important;color:#5149b7!important;border:0!important;padding:6px 0!important;text-decoration:underline;font-weight:650!important}
+#passwordResetForm{margin-top:12px;padding-top:12px;border-top:1px solid #e3e7f0}
+</style>
