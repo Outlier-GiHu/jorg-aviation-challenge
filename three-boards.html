@@ -137,15 +137,33 @@ footer{color:#7b8298!important;padding:22px!important}
 .hint-clue-group:last-child{margin-bottom:0!important;padding-bottom:0!important;border-bottom:0!important}
 .hint-clue-group strong{display:inline-block;color:#5149b7;white-space:nowrap;margin-right:5px}
 
+
+/* Reliable in-grid counters and compact clue layout */
+.cell{position:relative!important;overflow:visible!important}
+.cell-count{position:absolute!important;top:auto!important;bottom:1px!important;z-index:5!important;display:block!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5149b7!important;font-size:clamp(6px,.78vw,10px)!important;line-height:1!important;font-weight:900!important;opacity:1!important;text-shadow:0 0 2px #fff,0 0 3px #fff!important;pointer-events:none!important}
+.cell-count.start-count{left:2px!important;right:auto!important}
+.cell-count.frequency-count{right:2px!important;left:auto!important;color:#078b83!important}
+.cell-count:empty{display:none!important}
+.word-clues-panel{width:100%!important}
+.clue-intro{margin:0 0 10px;color:#64748b;font-size:.88rem;line-height:1.45}
+.hint-clue-group{display:block!important;margin:0 0 9px!important;padding:0 0 7px!important;border-bottom:1px solid #e1e5f0!important;line-height:1.65!important}
+.hint-clue-group:last-child{margin-bottom:0!important;padding-bottom:0!important;border-bottom:0!important}
+.hint-clue-group strong{color:#5149b7!important;white-space:nowrap;margin-right:5px}
+.account-panel h2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.account-reset-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:.88rem;color:#64748b}
+.account-reset-link{background:transparent!important;color:#5149b7!important;border:0!important;box-shadow:none!important;padding:4px 0!important;text-decoration:underline;text-underline-offset:3px;font-weight:750;cursor:pointer}
+.account-reset-help{margin:4px 0 0;color:#64748b;font-size:.8rem}
+.account-panel{margin-top:22px!important}
 </style></head><body><header><h1>Jörg's Aviation and Travel Challenge</h1></header><main class="wrap">
 
 <section class="panel"><div class="topline"><div class="tabs" id="tabs"></div><div class="stats" id="stats"></div></div><div class="bar"><div id="progress"></div></div><div class="grid" id="grid" aria-label="Letter grid"></div><div class="gridstatus" id="status" aria-live="polite">Find a word to get started!</div></section>
-<section class="panel"><h2 style="font-size:1.1rem;margin:0 0 12px">Your hints</h2><div class="hints"><div class="hint"><h3>10% — Words starting at each square</h3><p id="hint10" class="locked">Unlocks after 8 words.</p></div><div class="hint"><h3>15% — Words using each square</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div><div class="hint"><h3>20% — Word clues</h3><div id="hint20" class="locked">Unlocks after 16 words.</div></div></div></section>
+<section class="panel word-clues-panel"><h2 style="font-size:1.1rem;margin:0 0 12px">20% — Word Clues</h2><p class="clue-intro">The clues are grouped by word length. The letter counts in the grid show where remaining words start and which squares they use.</p><div id="hint20" class="locked">Unlocks after 16 words.</div></section>
 <section class="panel"><h2 style="font-size:1.1rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked">Your discoveries will appear here.</span></div></section>
 
-<section class="panel account-panel">
-  <details>
-    <summary><span>Spielstand sichern & auf anderen Geräten weiterspielen</span><span class="account-status" id="accountStatus">Nicht angemeldet</span></summary>
+
+
+<section class="complete" id="complete"><h2>All words found!</h2><p>All 77 words have been discovered. Well done!</p></section><section class="panel account-panel">
+  <h2 style="font-size:1.1rem;margin:0 0 12px">Spielstand sichern & auf anderen Geräten weiterspielen <span class="account-status" id="accountStatus">Nicht angemeldet</span></h2>
     <div class="account-content">
       <p class="account-intro">Mit einem Konto wird dein Spielstand automatisch gespeichert und auf anderen Geräten geladen.</p>
       <div id="accountSignedOut">
@@ -157,9 +175,10 @@ footer{color:#7b8298!important;padding:22px!important}
           <div class="account-actions">
             <button type="submit" id="signInButton">Anmelden</button>
             <button type="button" class="secondary" id="signUpButton">Konto erstellen</button>
-            <button type="button" class="account-reset-link" id="forgotPasswordButton">Passwort vergessen?</button>
           </div>
+          <div class="account-reset-row"><span>Passwort vergessen?</span><button type="button" class="account-reset-link" id="forgotPasswordButton">Passwort zurücksetzen</button>
         </form>
+          <p class="account-reset-help">Dazu bitte zuerst oben deine E-Mail-Adresse eintragen.</p>
       </div>
       <form id="passwordResetForm" class="account-form" hidden>
         <label for="newAccountPassword">Neues Passwort (mindestens 8 Zeichen)</label>
@@ -172,10 +191,8 @@ footer{color:#7b8298!important;padding:22px!important}
       </div>
       <p id="accountMessage" class="account-message" role="status" aria-live="polite"></p>
     </div>
-  </details>
 </section>
-
-<section class="complete" id="complete"><h2>All words found!</h2><p>All 77 words have been discovered. Well done!</p></section></main><footer>Jörg's Aviation and Travel Challenge</footer>
+</main><footer>Jörg's Aviation and Travel Challenge</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const BOARDS=[{"grid":[["Z","O","Q","S","O","H","T","T","T","A","P","A","H","I"],["U","Y","W","M","G","J","U","R","M","T","W","P","R","Z"],["D","A","D","K","Z","P","E","U","O","I","A","O","C","E"],["T","A","A","S","I","A","T","N","I","R","N","I","T","T"],["E","A","B","I","N","Y","X","S","A","T","V","U","I","Z"],["F","T","C","G","S","A","C","E","S","L","A","M","O","S"],["H","T","A","I","N","W","R","C","A","U","I","C","N","O"],["A","E","G","U","R","U","G","L","O","A","C","A","L","G"],["R","I","N","G","B","A","L","K","K","I","I","U","A","B"],["T","A","L","I","A","N","U","C","O","P","T","L","T","S"],["E","S","U","E","D","N","H","M","C","G","Z","E","E","S"],["B","R","R","A","S","R","E","D","I","N","F","N","E","L"],["U","F","A","A","R","H","P","H","R","F","D","B","R","T"],["J","C","H","J","H","E","S","T","E","A","O","E","W","A"]],"words":["ANNUAL","AUSTRALIA","AUSTRALIANSHEPHERD","AVIATION","BOARDING","BUCHAREST","CAIRNS","COCKPIT","DATA","FABIA","FREIBURG","GATE","GATHERING","JAHRESTREFFEN","JUTTA","LESSABLONS","LOCSEC","MOUNTAIN","MOUNTAINS","PERTH","PROTECTION","RUNWAY","STLUCIA","WAPPAH","WATERBED"]},{"grid":[["E","U","J","U","E","L","H","H","O","C","Y","O","R","I"],["U","L","M","N","U","B","Z","S","U","R","P","A","T","R"],["T","B","A","K","N","I","U","L","K","S","U","S","I","A"],["A","T","G","Q","L","F","W","B","Y","E","S","E","G","K"],["L","A","R","O","I","X","O","R","D","D","Y","N","U","B"],["E","M","O","Y","N","K","I","M","R","N","A","S","A","S"],["Q","I","L","P","T","C","A","A","E","L","P","F","I","H"],["U","A","R","I","A","E","F","Y","Y","H","U","E","T","N"],["B","L","E","R","G","L","H","I","L","O","O","H","E","S"],["A","L","A","D","R","C","Y","O","N","A","K","S","S","A"],["L","O","N","U","G","S","B","P","E","G","O","G","L","O"],["U","E","T","O","B","A","I","B","M","L","A","N","Q","C"],["E","P","M","E","A","R","T","A","Y","I","S","U","B","S"],["L","T","R","C","G","A","N","S","A","T","I","N","E","S"]],"words":["AIRBUS","AIRPORT","AUSSIE","BALLARAT","BENNI","BLUE","BUSINESS","BUSINESSCLASS","CARIBBEAN","CHECKIN","EMAG","FLYING","GUADELOUPE","HONGKONG","HORSE","LUCY","LUFTHANSA","MALTA","OERTEL","POLYAMORY","PORTIRAGNE","QUALITY","QUALITYMANAGEMENT","SHEPHERD","STRASBOURG","SYDNEY"]},{"grid":[["Q","L","F","U","L","A","G","T","X","Z","X","W","F","N"],["W","B","U","M","M","B","Q","A","S","F","D","C","H","K"],["G","U","I","D","E","U","Y","N","F","I","R","A","O","J"],["S","B","D","B","R","O","V","D","Y","G","R","E","C","K"],["A","N","Y","U","L","O","X","B","R","A","N","N","E","B"],["F","V","E","N","A","F","P","W","R","U","J","I","G","O"],["A","M","I","L","S","E","N","M","E","L","P","N","K","W"],["R","O","A","N","T","M","G","R","B","A","G","O","I","S"],["U","T","H","B","E","M","A","N","U","O","C","O","E","T"],["K","N","A","Y","R","S","A","S","D","A","M","S","O","A"],["F","R","F","O","R","P","A","S","E","N","B","B","W","K"],["H","U","B","C","R","T","A","D","A","F","L","A","R","S"],["R","D","A","K","O","T","L","C","T","I","L","C","U","T"],["T","U","O","S","S","I","E","C","I","O","N","B","A","S"]],"words":["AUSTRALIAN","AYERSROCK","BARBADOS","BLUEMOUNTAINS","BMAG","BOEING","CARDIFF","CLASS","COOKING","DATAPROTECTION","EUROPEAN","FABI","FRANKFURT","JANINE","JOERG","KATOOMBA","MANAGEMENT","MELBOURNE","MENSA","OXFORD","ROCK","SILDENAFIL","SINGAPUR","STANDBY","TRAVEL","WIESBADEN"]}],TOTAL=BOARDS.reduce((n,b)=>n+b.words.length,0),allWords=new Set(BOARDS.flatMap(b=>b.words)),found=new Set(),bonusFound=new Set();
@@ -202,14 +219,27 @@ document.addEventListener('pointermove',e=>{if(!dragging||e.pointerId!==activePo
 document.addEventListener('pointerup',e=>{if(!dragging||e.pointerId!==activePointer)return;activePointer=null;finish()});
 document.addEventListener('pointercancel',e=>{if(!dragging||e.pointerId!==activePointer)return;activePointer=null;dragging=false;path=[];grid()});
 function findWordFootprint(grid,word){
- const rows=grid.length,cols=grid[0].length,used=new Uint8Array(rows*cols),path=[],starts=new Set(),cells=new Set();
- function walk(r,c,pos){const idx=r*cols+c;if(used[idx]||grid[r][c]!==word[pos])return;used[idx]=1;path.push(idx);
-  if(pos===word.length-1){starts.add(path[0]);path.forEach(x=>cells.add(x));}
-  else for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&!used[nr*cols+nc])walk(nr,nc,pos+1);}
-  path.pop();used[idx]=0;
+ const rows=grid.length,cols=grid[0].length;
+ function scan(target){
+  const used=new Uint8Array(rows*cols),path=[],starts=new Set(),cells=new Set();
+  function walk(r,c,pos){
+   const idx=r*cols+c;
+   if(used[idx]||grid[r][c]!==target[pos])return;
+   used[idx]=1;path.push(idx);
+   if(pos===target.length-1){starts.add(path[0]);path.forEach(x=>cells.add(x));}
+   else for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+    if(!dr&&!dc)continue;
+    const nr=r+dr,nc=c+dc;
+    if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&!used[nr*cols+nc])walk(nr,nc,pos+1);
+   }
+   path.pop();used[idx]=0;
+  }
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(grid[r][c]===target[0])walk(r,c,0);
+  return {starts,cells};
  }
- for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(grid[r][c]===word[0])walk(r,c,0);
- return {starts,cells};
+ const result=scan(word),reverse=[...word].reverse().join('');
+ if(reverse!==word){const reversed=scan(reverse);reversed.starts.forEach(x=>result.starts.add(x));reversed.cells.forEach(x=>result.cells.add(x));}
+ return result;
 }
 function locateFoundWord(word){
  let boardIndex=BOARDS.findIndex(b=>b.words.includes(word));
@@ -239,10 +269,9 @@ function gridHintCounts(remaining){
  const starts=new Map(),uses=new Map(),grid=BOARDS[active].grid,remainingSet=new Set(remaining);
  for(const word of BOARDS[active].words){
   if(!remainingSet.has(word))continue;
-  const path=findWordPath(grid,word);
-  if(!path||!path.length)continue;
-  const first=path[0];starts.set(first,(starts.get(first)||0)+1);
-  for(const idx of path)uses.set(idx,(uses.get(idx)||0)+1);
+  const footprint=findWordFootprint(grid,word);
+  footprint.starts.forEach(idx=>starts.set(idx,(starts.get(idx)||0)+1));
+  footprint.cells.forEach(idx=>uses.set(idx,(uses.get(idx)||0)+1));
  }
  return {starts,uses};
 }
@@ -250,9 +279,10 @@ function refreshGridCounts(remaining){
  const counts=gridHintCounts(remaining),cols=BOARDS[active].grid[0].length;
  document.querySelectorAll('#grid .cell').forEach(cell=>{
   const idx=Number(cell.dataset.r)*cols+Number(cell.dataset.c);
-  const left=cell.querySelector('.start-count'),right=cell.querySelector('.frequency-count');
-  if(left){const n=counts.starts.get(idx)||0;left.textContent=found.size>=8?(n>=10?'+':n||''):'';}
-  if(right){const n=counts.uses.get(idx)||0;right.textContent=found.size>=12?(n>=10?'+':n||''):'';}
+  let left=cell.querySelector('.start-count'),right=cell.querySelector('.frequency-count');if(!left){left=document.createElement('span');left.className='cell-count start-count';cell.appendChild(left)}if(!right){right=document.createElement('span');right.className='cell-count frequency-count';cell.appendChild(right)}
+  const startN=counts.starts.get(idx)||0,useN=counts.uses.get(idx)||0;
+  left.textContent=found.size>=8?(startN>=10?'+':startN||''):'';
+  right.textContent=found.size>=12?(useN>=10?'+':useN||''):'';
  });
 }
 function wordClue(word){
@@ -269,11 +299,17 @@ function renderWordClues(words,withBoard=false){
   return `<p class="hint-clue-group"><strong>${n} letters:</strong> ${clues}</p>`;
  }).join('')||'All words found!';
 }
-function update(){saveGame();let n=found.size,pct=Math.round(n/TOTAL*100),remaining=[...allWords].filter(w=>!found.has(w));refreshGridCounts(remaining);$('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`; $('progress').style.width=pct+'%';
-if(n>=8){let counts={};remaining.forEach(w=>counts[w[0]]=(counts[w[0]]||0)+1);$('hint10').className='';$('hint10').textContent=Object.keys(counts).sort().map(k=>`${k}: ${counts[k]}`).join(' · ')||'All words found!'}
-if(n>=12){let f={};remaining.forEach(w=>[...w].forEach(ch=>f[ch]=(f[ch]||0)+1));$('hint15').className='';$('hint15').textContent=Object.keys(f).sort().map(k=>`${k}: ${f[k]}`).join(' · ')||'All words found!'}
-if(n>=16){const clues=remaining.map(w=>({word:w,board:BOARDS.findIndex(b=>b.words.includes(w))}));$('hint20').className='';$('hint20').innerHTML=renderWordClues(clues,true)}
-$('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">Your discoveries will appear here.</span>';applyWordHighlight(); if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}}
+function update(){
+ saveGame();
+ const n=found.size,pct=Math.round(n/TOTAL*100),remaining=[...allWords].filter(w=>!found.has(w));
+ refreshGridCounts(remaining);
+ $('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`;
+ $('progress').style.width=pct+'%';
+ if(n>=16){const clues=remaining.map(w=>({word:w,board:BOARDS.findIndex(b=>b.words.includes(w))}));$('hint20').className='';$('hint20').innerHTML=renderWordClues(clues,true)}
+ $('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">Your discoveries will appear here.</span>';
+ applyWordHighlight();
+ if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}
+}
 
 // Supabase cloud save: local progress is retained as a fallback.
 const SUPABASE_URL = 'https://skipgolsoxdrishuoayq.supabase.co';
@@ -374,7 +410,7 @@ async function initCloudAuth(){
     showAccountMessage('Die Anmeldekomponente konnte nicht geladen werden. Bitte Internetverbindung prüfen.',true);return;
   }
   cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-  const accountDetails=document.querySelector('.account-panel details');
+  const accountDetails=null;
   document.getElementById('forgotPasswordButton').addEventListener('click',async()=>{
     const email=document.getElementById('accountEmail').value.trim();
     if(!email){showAccountMessage('Bitte zuerst deine E-Mail-Adresse eingeben.',true);document.getElementById('accountEmail').focus();return;}
