@@ -9,7 +9,7 @@ h1{font-size:clamp(1.3rem,4vw,2.1rem);margin:0;line-height:1.2}
 .bar{height:9px;background:#e8edf1;border-radius:20px;overflow:hidden;margin-top:9px}.bar>div{height:100%;background:var(--gold);width:0;transition:width .2s}
 .board-scroll{overflow-x:auto;padding:4px 0 10px}.grid{display:grid;grid-template-columns:repeat(22, minmax(0,1fr));gap:3px;width:min(100%,660px);min-width:0;margin:8px auto;touch-action:none;user-select:none}
 .cell{aspect-ratio:1;border:0;border-radius:5px;background:#eaf0f4;color:#18364e;font-size:clamp(.65rem,1.8vw,1rem);font-weight:800;cursor:pointer;padding:0;box-shadow:inset 0 -2px 0 #d3dfe7;touch-action:none}
-.cell.selected{background:#f2c75c;color:#172638}.cell{position:relative}.cell-letter{display:block;line-height:1}.cell-count{position:absolute;bottom:1px;min-width:7px;padding:0 2px;border-radius:4px;background:#547286;color:#fff;font-size:clamp(.34rem,.58vw,.48rem);font-weight:600;line-height:1.15;opacity:.82;pointer-events:none}.cell-count.start-count{left:2px}.cell-count.frequency-count{right:2px;background:#547286}.cell-count:empty{display:none}.hints{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.cell.selected{background:#f2c75c;color:#172638}.cell{position:relative}.cell-letter{display:block;line-height:1}.cell-count{position:absolute;top:1px;bottom:auto;min-width:7px;padding:0 2px;border-radius:4px;background:#547286;color:#fff;font-size:clamp(.34rem,.58vw,.48rem);font-weight:600;line-height:1.15;opacity:.82;pointer-events:none}.cell-count.start-count{left:2px}.cell-count.frequency-count{right:2px;background:#547286}.cell-count:empty{display:none}.hints{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
 .hint{background:#f4f7f9;border-radius:12px;padding:12px}.hint h3{font-size:.94rem;margin:0 0 6px;color:var(--blue)}.hint p{margin:0;font-size:.88rem;line-height:1.5;overflow-wrap:anywhere}
 .locked{color:var(--muted);font-style:italic}.gridstatus{text-align:center;min-height:24px;margin:8px 0 0;font-weight:650;color:var(--blue)}
 .foundlist{display:flex;gap:7px;flex-wrap:wrap}.wordchip{background:#e0f0e9;color:#17513e;border-radius:99px;padding:5px 9px;font-size:.82rem;font-weight:700}.bonuschip{background:#fff1cf;color:#76500a}
@@ -201,7 +201,7 @@ function saveGame(){try{localStorage.setItem(SAVE_KEY,JSON.stringify({found:[...
 }
 loadSavedGame();
 function drawGrid(){const el=$('grid');el.innerHTML='';BOARD.grid.forEach((row,r)=>row.forEach((letter,c)=>{
- const b=document.createElement('button');b.className='cell';b.type='button';b.innerHTML=`<span class=\"cell-letter\">${letter}</span><span class=\"cell-count\" aria-hidden=\"true\"></span>`;b.dataset.r=r;b.dataset.c=c;
+ const b=document.createElement('button');b.className='cell';b.type='button';b.innerHTML=`<span class=\"cell-letter\">${letter}</span><span class=\"cell-count start-count\" aria-hidden=\"true\"></span><span class=\"cell-count frequency-count\" aria-hidden=\"true\"></span>`;b.dataset.r=r;b.dataset.c=c;
  el.appendChild(b);
 }));refreshGridCounts(WORDS.filter(w=>!found.has(w)));applyWordHighlight()}
 function addCell(r,c){const last=path[path.length-1];if(path.length>1&&path[path.length-2].r===r&&path[path.length-2].c===c){path.pop();paint();return}if(path.some(p=>p.r===r&&p.c===c))return;if(last&&Math.abs(last.r-r)<=1&&Math.abs(last.c-c)<=1){path.push({r,c});paint()}}
