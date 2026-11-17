@@ -61,6 +61,86 @@ header{background:linear-gradient(125deg,#142d43 0%,#1e526c 58%,#287c83 100%);bo
 .signed-in-email{font-weight:650;color:#31566a}
 @media(max-width:500px){.grid{gap:4px}.cell{border-radius:6px}.account-panel summary{align-items:flex-start}.account-status{white-space:nowrap}}
 
+
+/* Visual redesign: clearer hierarchy, brighter gradients, and stronger controls */
+:root{
+  --ink:#182638;--muted:#64748b;--accent:#6257d9;--accent2:#18a6a0;
+  --paper:#f3f4fb;--tile:#edf0fb;--line:#e1e5f0;
+}
+html{background:var(--paper)}
+body{
+  background:radial-gradient(ellipse at 12% 0%,#e6e1ff 0,transparent 34%),
+             radial-gradient(ellipse at 95% 18%,#d9f5f0 0,transparent 30%),
+             linear-gradient(180deg,#f6f7fc 0%,#eef2f8 100%);
+  color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+header{
+  position:relative;overflow:hidden;padding:34px 18px 38px!important;
+  background:linear-gradient(115deg,#37318f 0%,#6556d9 48%,#16a6a0 100%)!important;
+  box-shadow:0 12px 35px #34308b30;
+}
+header:before,header:after{content:"";position:absolute;border-radius:50%;pointer-events:none}
+header:before{width:260px;height:260px;right:-55px;top:-155px;background:#ffffff18}
+header:after{width:180px;height:180px;left:-75px;bottom:-125px;background:#ffffff16}
+header h1{position:relative;z-index:1;letter-spacing:-.035em;text-shadow:0 2px 12px #17134a30}
+.wrap{max-width:1040px!important;margin:26px auto 34px!important;padding:0 16px!important}
+.panel,.welcome{
+  background:rgba(255,255,255,.94)!important;border:1px solid #fff!important;
+  border-radius:22px!important;padding:21px 23px!important;margin-bottom:18px!important;
+  box-shadow:0 10px 30px #25365b0d,0 2px 7px #25365b08!important;
+}
+.panel h2{font-size:1.16rem!important;letter-spacing:-.02em;color:#292c50;margin-bottom:13px!important}
+.topline{gap:14px}
+.stats{color:#5149b7!important;font-size:.98rem;font-weight:800;letter-spacing:-.01em}
+.bar{height:12px!important;border-radius:99px!important;background:#e8eaf5!important;margin-top:12px!important}
+.bar>div{border-radius:99px;background:linear-gradient(90deg,#6257d9 0%,#8874ee 52%,#20b7a5 100%)!important;box-shadow:0 2px 8px #6257d944}
+.grid{gap:5px!important;padding:8px!important;border-radius:18px;background:linear-gradient(145deg,#f7f8ff,#edf3fa);box-shadow:inset 0 1px 4px #34416c0b}
+.cell{
+  background:linear-gradient(145deg,#fff 0%,#e9edfa 100%)!important;color:#30385b!important;
+  border:1px solid #dce2f1!important;border-radius:9px!important;
+  box-shadow:0 2px 4px #35436b12,inset 0 -2px 0 #d6dcef!important;
+  font-weight:850!important;transition:transform .13s,box-shadow .13s,background .13s!important;
+}
+.cell:nth-child(4n),.cell:nth-child(4n+1){background:linear-gradient(145deg,#fff,#e7f0f5)!important}
+.cell:hover{transform:translateY(-1px);box-shadow:0 4px 9px #35436b20!important;background:#e2eaff!important}
+.cell.selected{background:linear-gradient(145deg,#ffe18b,#ffbd59)!important;color:#43320d!important;border-color:#f0bd59!important;box-shadow:0 0 0 2px white,0 0 0 4px #e7b34c!important}
+.cell.word-highlight{background:linear-gradient(145deg,#a9f0df,#54cbb5)!important;color:#123e3c!important;border-color:#3bb89f!important;box-shadow:0 0 0 2px #fff,0 0 0 4px #24a993,0 5px 12px #168d7a30!important}
+.cell-count{background:#5c56bd!important;border-radius:5px!important}
+.cell-count.frequency-count{background:#278d91!important}
+.gridstatus{font-size:.92rem;color:#5550aa!important;font-weight:750!important;min-height:28px}
+.tabs{gap:9px!important}
+.tab{border:1px solid #dfe3f0!important;border-radius:13px!important;padding:10px 16px!important;background:#f7f8fd!important;color:#4b5270!important;font-weight:750!important}
+.tab.active{background:linear-gradient(110deg,#6257d9,#398fae)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 5px 13px #6257d936!important}
+.hints{gap:12px!important}
+.hint{position:relative;overflow:hidden;background:linear-gradient(145deg,#f8f7ff,#eef6fb)!important;border:1px solid #e3e5f4!important;border-radius:16px!important;padding:16px!important}
+.hint:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#7568e8,#28b6a5)}
+.hint h3{color:#5149b7!important;font-size:.94rem!important}
+.hint p{color:#46516a}
+.found-help{padding:9px 12px;border-radius:10px;background:#f1f4fc;color:#58617c!important;line-height:1.45}
+.foundlist{gap:9px!important}
+.wordchip{padding:7px 12px!important;border-radius:11px!important;background:linear-gradient(135deg,#d9f5ec,#c5ece4)!important;color:#176451!important;font-size:.84rem!important;font-weight:800!important;box-shadow:0 2px 5px #16745b12}
+.wordchip:hover,.wordchip.wordchip-active{background:linear-gradient(135deg,#b8f0e0,#8cdecf)!important;box-shadow:0 0 0 2px #fff,0 0 0 4px #35ad98,0 5px 12px #16745b20!important}
+.wordchip.bonuschip,.bonuschip{background:linear-gradient(135deg,#fff0ca,#ffdfa0)!important;color:#76500a!important}
+.account-panel{background:linear-gradient(135deg,#fff 0%,#f4f3ff 100%)!important}
+.account-panel summary{color:#393783!important;font-size:1rem}
+.account-panel summary:after{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:9px;background:#e8e6ff;color:#5e54cb!important}
+.account-status{background:#e9f5f3;padding:5px 9px;border-radius:99px;color:#287c72!important}
+.account-content{border-top:1px solid #e6e7f2;margin-top:12px}
+.account-form input{border:1px solid #d8dced!important;border-radius:11px!important;padding:12px!important;background:#fff!important}
+.account-form input:focus{outline:3px solid #d9d5ff!important;border-color:#7568e8!important}
+.account-actions button,.account-content>div>button{border:0!important;border-radius:11px!important;padding:11px 17px!important;background:linear-gradient(110deg,#6257d9,#398fae)!important;box-shadow:0 4px 10px #6257d92a}
+.account-actions button.secondary,.account-content>div>button.secondary{background:#eceef8!important;color:#424a6b!important;border:1px solid #dfe3f0!important;box-shadow:none!important}
+.complete{border:1px solid #f1d58d!important;border-radius:20px!important;background:linear-gradient(135deg,#fff9e8,#fff0ca)!important;box-shadow:0 8px 22px #9b762014}
+footer{color:#7b8298!important;padding:22px!important}
+@media(max-width:600px){
+ .wrap{margin:15px auto 24px!important;padding:0 10px!important}
+ .panel,.welcome{padding:15px!important;border-radius:17px!important}
+ header{padding:27px 14px 30px!important}
+ .grid{gap:3px!important;padding:5px!important}
+ .cell{border-radius:6px!important}
+ .tab{padding:8px 11px!important}
+}
+
 </style></head><body>
 <header><h1>Jörg's Aviation and Travel Challenge</h1></header>
 <main class="wrap">
