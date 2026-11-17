@@ -16,6 +16,13 @@ h1{font-size:clamp(1.3rem,4vw,2.1rem);margin:0;line-height:1.2}
 .complete{display:none;text-align:center;background:#fff8e6;border:1px solid #f0d58f;border-radius:16px;padding:20px;margin:14px 0}.complete h2{margin:0 0 8px;color:#785514}
 footer{text-align:center;color:var(--muted);font-size:.78rem;padding:16px}
 
+
+/* Found-word locator */
+.wordchip{border:0;font:inherit;cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s;user-select:none}
+.wordchip:hover,.wordchip.wordchip-active{transform:translateY(-1px);box-shadow:0 0 0 2px #287c8355,0 3px 9px #17384b18}
+.cell.word-highlight{background:linear-gradient(145deg,#ffe08a,#f4b94f)!important;color:#25313a!important;box-shadow:inset 0 -3px 0 #d99a2d,0 0 0 2px #fff,0 0 0 4px #287c83!important;transform:scale(.97);z-index:1}
+.found-help{font-size:.82rem;color:var(--muted);margin:0 0 10px}
+
 /* Account and visual refresh */
 :root{--navy:#142d43;--blue:#24627a;--gold:#e6b85c;--paper:#f2f5f7;--ink:#182a38;--muted:#657887;--accent:#287c83;--tile:#e7eff1}
 body{background:radial-gradient(ellipse at 50% -15%,#e2edf0 0,transparent 48%),var(--paper)}
@@ -91,7 +98,7 @@ header{background:linear-gradient(125deg,#142d43 0%,#1e526c 58%,#287c83 100%);bo
 <div class="hint"><h3>15% — Words using each square</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div>
 <div class="hint"><h3>20% — Word clues</h3><p id="hint20" class="locked">Unlocks after 16 words.</p></div>
 </div></section>
-<section class="panel"><h2 style="font-size:1.08rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><div class="foundlist" id="foundlist"><span class="locked"> </span></div></section>
+<section class="panel"><h2 style="font-size:1.08rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked"> </span></div></section>
 <section class="complete" id="complete"><h2>Mission accomplished, Jörg! 🎉</h2><p>All 77 words found — what a journey! May your next adventures bring wonderful destinations, good company and plenty of unexpected discoveries.</p></section>
 </main><footer>Have fun and enjoy the journey!</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -116,7 +123,7 @@ loadSavedGame();
 function drawGrid(){const el=$('grid');el.innerHTML='';BOARD.grid.forEach((row,r)=>row.forEach((letter,c)=>{
  const b=document.createElement('button');b.className='cell';b.type='button';b.innerHTML=`<span class=\"cell-letter\">${letter}</span><span class=\"cell-count\" aria-hidden=\"true\"></span>`;b.dataset.r=r;b.dataset.c=c;
  el.appendChild(b);
-}));refreshGridCounts(WORDS.filter(w=>!found.has(w)))}
+}));refreshGridCounts(WORDS.filter(w=>!found.has(w)));applyWordHighlight()}
 function addCell(r,c){const last=path[path.length-1];if(path.length>1&&path[path.length-2].r===r&&path[path.length-2].c===c){path.pop();paint();return}if(path.some(p=>p.r===r&&p.c===c))return;if(last&&Math.abs(last.r-r)<=1&&Math.abs(last.c-c)<=1){path.push({r,c});paint()}}
 function paint(){document.querySelectorAll('.cell').forEach(el=>el.classList.toggle('selected',path.some(p=>p.r===+el.dataset.r&&p.c===+el.dataset.c)));$('status').textContent=path.map(p=>BOARD.grid[p.r][p.c]).join('')}
 function finish(){if(!dragging)return;dragging=false;const raw=path.map(p=>BOARD.grid[p.r][p.c]).join(''),rev=[...raw].reverse().join(''),word=wordSet.has(raw)?raw:wordSet.has(rev)?rev:null;
@@ -125,6 +132,7 @@ function finish(){if(!dragging)return;dragging=false;const raw=path.map(p=>BOARD
  else {const bonus=bonusWordSet.has(raw)?raw:bonusWordSet.has(rev)?rev:null;if(bonus&&bonus.length>=3){if(!bonusFound.has(bonus)){bonusFound.add(bonus);$('status').textContent='★ '+bonus+' — bonus word!';update()}else $('status').textContent=bonus+' is already counted as a bonus word.'}else if(raw.length>1){$('status').textContent=raw+' — '+(bonusDictionaryReady?'not on the list.':'not recognized yet; bonus dictionary is still loading.')}}
  path=[];drawGrid()}
 let activePointer=null;
+let pinnedWord=null,hoveredWord=null;
 function cellFromPoint(x,y){const node=document.elementFromPoint(x,y);const cell=node&&node.closest?node.closest('.cell'):null;return cell&&$('grid').contains(cell)?{r:+cell.dataset.r,c:+cell.dataset.c}:null}
 $('grid').addEventListener('pointerdown',e=>{const cell=e.target.closest&&e.target.closest('.cell');if(!cell)return;e.preventDefault();dragging=true;activePointer=e.pointerId;path=[{r:+cell.dataset.r,c:+cell.dataset.c}];paint()});
 document.addEventListener('pointermove',e=>{if(!dragging||e.pointerId!==activePointer)return;e.preventDefault();const cell=cellFromPoint(e.clientX,e.clientY);if(cell)addCell(cell.r,cell.c)},{passive:false});
@@ -140,6 +148,24 @@ function findWordFootprint(grid,word){
  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(grid[r][c]===word[0])walk(r,c,0);
  return {starts,cells};
 }
+function findWordPath(grid,word){
+ const rows=grid.length,cols=grid[0].length,used=new Uint8Array(rows*cols),path=[];let answer=null;
+ function walk(r,c,pos){if(answer)return;const idx=r*cols+c;if(used[idx]||grid[r][c]!==word[pos])return;used[idx]=1;path.push(idx);
+  if(pos===word.length-1)answer=path.slice();
+  else for(let dr=-1;dr<=1&&!answer;dr++)for(let dc=-1;dc<=1&&!answer;dc++){if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<rows&&nc>=0&&nc<cols)walk(nr,nc,pos+1);}
+  path.pop();used[idx]=0;
+ }
+ for(let r=0;r<rows&&!answer;r++)for(let c=0;c<cols&&!answer;c++)if(grid[r][c]===word[0])walk(r,c,0);
+ if(!answer){const rev=[...word].reverse().join('');if(rev!==word)return findWordPath(grid,rev)}
+ return answer;
+}
+function applyWordHighlight(){
+ const word=hoveredWord||pinnedWord;document.querySelectorAll('#grid .cell').forEach(cell=>cell.classList.remove('word-highlight'));
+ document.querySelectorAll('#foundlist .wordchip').forEach(chip=>chip.classList.toggle('wordchip-active',chip.dataset.word===word));
+ if(!word)return;const cells=findWordPath(BOARD.grid,word);if(cells)cells.forEach(idx=>{const cell=document.querySelector(`#grid .cell[data-r="${Math.floor(idx/BOARD.grid[0].length)}"][data-c="${idx%BOARD.grid[0].length}"]`);if(cell)cell.classList.add('word-highlight')});
+}
+function wireFoundWordList(){const list=$('foundlist');list.addEventListener('pointerover',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const chip=e.target.closest('.wordchip');if(!chip||chip.contains(e.relatedTarget))return;hoveredWord=chip.dataset.word;applyWordHighlight()});list.addEventListener('pointerout',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const chip=e.target.closest('.wordchip');if(!chip||chip.contains(e.relatedTarget))return;hoveredWord=null;applyWordHighlight()});list.addEventListener('click',e=>{const chip=e.target.closest('.wordchip');if(!chip)return;const word=chip.dataset.word;pinnedWord=pinnedWord===word?null:word;hoveredWord=null;applyWordHighlight();$('status').textContent=pinnedWord?word+' — shown in the grid.':'Grid highlight cleared.'});}
+wireFoundWordList();
 function gridHintCounts(remaining){
  const starts=new Map(),uses=new Map(),grid=BOARD.grid;
  const add=(map,idx,word)=>{if(!map.has(idx))map.set(idx,new Set());map.get(idx).add(word)};
@@ -169,7 +195,7 @@ function update(){saveGame();const n=found.size,pct=Math.round(n/TOTAL*100),rema
  if(n>=8){const counts={};remaining.forEach(w=>counts[w[0]]=(counts[w[0]]||0)+1);$('hint10').className='';$('hint10').textContent=Object.keys(counts).sort().map(k=>`${k}: ${counts[k]}`).join(' · ')||'All words found!'}
  if(n>=12){const f={};remaining.forEach(w=>[...w].forEach(ch=>f[ch]=(f[ch]||0)+1));$('hint15').className='';$('hint15').textContent=Object.keys(f).sort().map(k=>`${k}: ${f[k]}`).join(' · ')||'All words found!'}
  if(n>=16){const clues=remaining.slice().sort((a,b)=>a.localeCompare(b)).map(wordClue);$('hint20').className='';$('hint20').textContent=clues.join(' · ')||'All words found!'}
- $('foundlist').innerHTML=[...found].sort().map(w=>`<span class="wordchip">${w}</span>`).join('')+[...bonusFound].sort().map(w=>`<span class="wordchip bonuschip">★ ${w}</span>`).join('')||'<span class="locked">No words found yet.</span>'; 
+ $('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">No words found yet.</span>';applyWordHighlight(); 
  if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}}
 
 // Supabase cloud save: local progress is retained as a fallback.
