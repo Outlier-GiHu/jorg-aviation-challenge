@@ -128,9 +128,20 @@ footer{color:#7b8298!important;padding:22px!important}
  .tab{padding:8px 11px!important}
 }
 
+
+/* Final hint layout overrides */
+.cell-count{top:auto!important;bottom:2px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5149b7!important;font-size:clamp(.5rem,.78vw,.64rem)!important;line-height:1!important;font-weight:850!important;opacity:1!important;text-shadow:0 1px 2px #fff,0 0 3px #fff!important}
+.cell-count.start-count{left:3px!important;right:auto!important}
+.cell-count.frequency-count{right:3px!important;left:auto!important;color:#168b87!important;background:transparent!important}
+.hint-clue-group{display:block!important;margin:0 0 11px!important;padding:0 0 8px!important;border-bottom:1px solid #e1e5f0!important;line-height:1.65!important}
+.hint-clue-group:last-child{margin-bottom:0!important;padding-bottom:0!important;border-bottom:0!important}
+.hint-clue-group strong{display:inline-block;color:#5149b7;white-space:nowrap;margin-right:5px}
+
 </style></head><body><header><h1>Jörg's Aviation and Travel Challenge</h1></header><main class="wrap">
 
 <section class="panel"><div class="topline"><div class="tabs" id="tabs"></div><div class="stats" id="stats"></div></div><div class="bar"><div id="progress"></div></div><div class="grid" id="grid" aria-label="Letter grid"></div><div class="gridstatus" id="status" aria-live="polite">Find a word to get started!</div></section>
+<section class="panel"><h2 style="font-size:1.1rem;margin:0 0 12px">Your hints</h2><div class="hints"><div class="hint"><h3>10% — Words starting at each square</h3><p id="hint10" class="locked">Unlocks after 8 words.</p></div><div class="hint"><h3>15% — Words using each square</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div><div class="hint"><h3>20% — Word clues</h3><div id="hint20" class="locked">Unlocks after 16 words.</div></div></div></section>
+<section class="panel"><h2 style="font-size:1.1rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked">Your discoveries will appear here.</span></div></section>
 
 <section class="panel account-panel">
   <details>
@@ -163,9 +174,7 @@ footer{color:#7b8298!important;padding:22px!important}
     </div>
   </details>
 </section>
-</section>
-<section class="panel"><h2 style="font-size:1.1rem;margin:0 0 12px">Your hints</h2><div class="hints"><div class="hint"><h3>10% — Words starting at each square</h3><p id="hint10" class="locked">Unlocks after 8 words.</p></div><div class="hint"><h3>15% — Words using each square</h3><p id="hint15" class="locked">Unlocks after 12 words.</p></div><div class="hint"><h3>20% — Word clues</h3><div id="hint20" class="locked">Unlocks after 16 words.</div></div></div></section>
-<section class="panel"><h2 style="font-size:1.1rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked">Your discoveries will appear here.</span></div></section>
+
 <section class="complete" id="complete"><h2>All words found!</h2><p>All 77 words have been discovered. Well done!</p></section></main><footer>Jörg's Aviation and Travel Challenge</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -242,8 +251,8 @@ function refreshGridCounts(remaining){
  document.querySelectorAll('#grid .cell').forEach(cell=>{
   const idx=Number(cell.dataset.r)*cols+Number(cell.dataset.c);
   const left=cell.querySelector('.start-count'),right=cell.querySelector('.frequency-count');
-  if(left){const n=counts.starts.get(idx)?.size||0;left.textContent=found.size>=8?(n>=10?'+':n||''):'';}
-  if(right){const n=counts.uses.get(idx)?.size||0;right.textContent=found.size>=12?(n>=10?'+':n||''):'';}
+  if(left){const n=counts.starts.get(idx)||0;left.textContent=found.size>=8?(n>=10?'+':n||''):'';}
+  if(right){const n=counts.uses.get(idx)||0;right.textContent=found.size>=12?(n>=10?'+':n||''):'';}
  });
 }
 function wordClue(word){
