@@ -577,6 +577,14 @@ window.supabaseLibraryReady.then(ready => {
 .board-clues-layout>.word-clues-panel{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;}
 @media(max-width:900px){.board-clues-layout{grid-template-columns:minmax(0,1fr);}.board-clues-layout>.word-clues-panel{position:static;max-height:none;overflow:visible;}}
 </style>
+
+<style id="word-clues-width-balance">
+@media(min-width:901px){
+  .board-clues-layout{grid-template-columns:minmax(0,1fr) minmax(285px,.44fr)!important}
+  .board-clues-layout .grid{width:min(100%,780px)!important;max-width:780px!important}
+}
+</style>
+
 </body></html>
 <style id="requested-readability-adjustments">
 .cell-count{top:auto!important;bottom:2px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5149b7!important;font-size:clamp(.5rem,.78vw,.64rem)!important;line-height:1!important;font-weight:850!important;opacity:1!important;text-shadow:0 1px 2px #fff,0 0 3px #fff!important}
