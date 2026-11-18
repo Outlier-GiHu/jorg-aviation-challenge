@@ -298,7 +298,7 @@ function renderWordClues(words,withBoard=false){
  for(const item of words){const word=typeof item==='string'?item:item.word;const n=word.length;if(!groups.has(n))groups.set(n,[]);groups.get(n).push(typeof item==='string'?{word}:{word,board:item.board});}
  return [...groups.keys()].sort((a,b)=>a-b).map(n=>{
   const entries=groups.get(n).sort((a,b)=>a.word.localeCompare(b.word));
-  const clues=entries.map(x=>`${wordClue(x.word)}${withBoard?` — Board ${x.board+1}`:''}`).join(' · ');
+  const clues=entries.map(x=>{const shown=found.has(x.word)?x.word:wordClue(x.word);return `<span>${shown}${withBoard?` — Board ${x.board+1}`:''}</span>`}).join(' · ');
   return `<p class="hint-clue-group"><strong>${n} letters:</strong> ${clues}</p>`;
  }).join('')||'All words found!';
 }
@@ -308,7 +308,7 @@ function update(){
  refreshGridCounts(remaining);
  $('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`;
  $('progress').style.width=pct+'%';
- if(n>=16){const clues=remaining.map(w=>({word:w,board:BOARDS.findIndex(b=>b.words.includes(w))}));$('hint20').className='';$('hint20').innerHTML=renderWordClues(clues,true)}
+ if(n>=16){const clues=[...allWords].map(w=>({word:w,board:BOARDS.findIndex(b=>b.words.includes(w))}));$('hint20').className='';$('hint20').innerHTML=renderWordClues(clues,true)}
  $('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">Your discoveries will appear here.</span>';
  applyWordHighlight();
  if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}
@@ -544,3 +544,4 @@ initCloudAuth();
 #passwordResetForm{margin-top:12px;padding-top:12px;border-top:1px solid #e3e7f0}
 #passwordResetForm:not(.recovery-active){display:none!important}
 </style>
+
