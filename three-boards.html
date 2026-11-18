@@ -437,6 +437,7 @@ async function initCloudAuth(){
         const {data,error}=await cloudClient.auth.updateUser({password});
         if(error){showAccountMessage('Das Passwort konnte nicht geändert werden: '+error.message,true);return;}
         document.getElementById('passwordResetForm').hidden=true;
+        document.getElementById('passwordResetForm').classList.remove('recovery-active');
         document.getElementById('accountSignedOut').hidden=true;
         showAccountUser(data.user||cloudUser);
         showAccountMessage('Passwort geändert. Dein Konto ist angemeldet; der Spielstand wird geladen.');
@@ -486,6 +487,7 @@ async function initCloudAuth(){
         document.getElementById('accountSignedOut').hidden=true;
         document.getElementById('accountSignedIn').hidden=true;
         document.getElementById('passwordResetForm').hidden=false;
+        document.getElementById('passwordResetForm').classList.add('recovery-active');
         showAccountMessage('Der Link ist gültig. Bitte vergib jetzt dein neues Passwort.');
         document.getElementById('newAccountPassword').focus();
         return;
@@ -501,6 +503,21 @@ async function initCloudAuth(){
   }
 }
 
+// Defensive auth bootstrap: never allow a silent native form submission/reload.
+const resetFormEl=document.getElementById('passwordResetForm');
+resetFormEl.hidden=true;
+resetFormEl.classList.remove('recovery-active');
+document.getElementById('accountForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!cloudClient){e.stopImmediatePropagation();showAccountMessage('Anmeldung noch nicht bereit. Bitte Seite neu laden. Falls die Meldung bleibt, blockiert der Browser möglicherweise die Supabase-Bibliothek.',true);}
+},true);
+resetFormEl.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!cloudClient){e.stopImmediatePropagation();showAccountMessage('Die Passwortfunktion ist noch nicht bereit. Bitte Seite neu laden.',true);}
+},true);
+document.getElementById('forgotPasswordButton').addEventListener('click',e=>{
+  if(!cloudClient){e.stopImmediatePropagation();showAccountMessage('Die Passwortfunktion konnte nicht geladen werden. Bitte Seite neu laden.',true);}
+},true);
 tabs();grid();update();
 initCloudAuth();
 </script></body></html>
@@ -515,4 +532,5 @@ initCloudAuth();
 .hint-clue-group strong{color:#5149b7;white-space:nowrap}
 .account-reset-link{background:transparent!important;color:#5149b7!important;border:0!important;padding:6px 0!important;text-decoration:underline;font-weight:650!important}
 #passwordResetForm{margin-top:12px;padding-top:12px;border-top:1px solid #e3e7f0}
+#passwordResetForm:not(.recovery-active){display:none!important}
 </style>
