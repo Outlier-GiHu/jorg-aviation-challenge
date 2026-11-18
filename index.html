@@ -336,7 +336,7 @@ function renderWordClues(words,withBoard=false){
  for(const item of words){const word=typeof item==='string'?item:item.word;const n=word.length;if(!groups.has(n))groups.set(n,[]);groups.get(n).push(typeof item==='string'?{word}:{word,board:item.board});}
  return [...groups.keys()].sort((a,b)=>a-b).map(n=>{
   const entries=groups.get(n).sort((a,b)=>a.word.localeCompare(b.word));
-  const clues=entries.map(x=>`${wordClue(x.word)}${withBoard?` — Board ${x.board+1}`:''}`).join(' · ');
+  const clues=entries.map(x=>{const shown=found.has(x.word)?x.word:wordClue(x.word);return `<span>${shown}${withBoard?` — Board ${x.board+1}`:''}</span>`}).join(' · ');
   return `<p class="hint-clue-group"><strong>${n} letters:</strong> ${clues}</p>`;
  }).join('')||'All words found!';
 }
@@ -346,7 +346,7 @@ function update(){
  refreshGridCounts(remaining);
  $('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`;
  $('progress').style.width=pct+'%';
- if(n>=16){$('hint20').className='';$('hint20').innerHTML=renderWordClues(remaining)}
+ if(n>=16){$('hint20').className='';$('hint20').innerHTML=renderWordClues(WORDS)}
  $('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">No words found yet.</span>';
  applyWordHighlight();
  if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}
@@ -613,3 +613,4 @@ window.supabaseLibraryReady.then(ready => {
 .board-clues-layout .cell-count.frequency-count{right:2px!important;left:auto!important;color:#078b83!important}
 @media(max-width:900px){.wrap{max-width:950px!important}.board-clues-layout{grid-template-columns:minmax(0,1fr)!important}.board-clues-layout .grid{column-gap:4px!important}}
 </style>
+
