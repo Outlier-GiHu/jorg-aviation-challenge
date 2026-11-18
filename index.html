@@ -171,9 +171,11 @@ footer{color:#7b8298!important;padding:22px!important}
 </style></head><body>
 <header><h1>Jörg's Aviation and Travel Challenge</h1></header>
 <main class="wrap">
+<div class="board-clues-layout">
 <section class="panel"><div class="topline"><strong>One big word hunt</strong><div class="stats" id="stats">0 / 77 words found</div></div><div class="bar"><div id="progress"></div></div>
 <div class="board-scroll"><div class="grid" id="grid" aria-label="Letter grid"></div></div><div class="gridstatus" id="status" aria-live="polite"> </div></section>
 <section class="panel word-clues-panel"><h2 style="font-size:1.1rem;margin:0 0 12px">20% — Word Clues</h2><p class="clue-intro">The clues are grouped by word length. The letter counts in the grid show where remaining words start and which squares they use.</p><div id="hint20" class="locked">Unlocks after 16 words.</div></section>
+</div>
 <section class="panel"><h2 style="font-size:1.08rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked"> </span></div></section>
 
 
@@ -567,7 +569,15 @@ window.supabaseLibraryReady.then(ready => {
     showAccountMessage('Die Supabase-Bibliothek konnte über beide Download-Adressen nicht geladen werden. Bitte prüfe, ob dein Browser oder ein Netzwerkfilter diese Adressen blockiert.', true);
   }
 });
-</script></body></html>
+</script>
+<style id="word-clues-beside-board">
+/* Layout-only change: keep the clue panel beside the board on wide screens. */
+.board-clues-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(285px,0.58fr);align-items:start;gap:18px;width:100%;}
+.board-clues-layout>.panel{min-width:0;margin-top:0!important;}
+.board-clues-layout>.word-clues-panel{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;}
+@media(max-width:900px){.board-clues-layout{grid-template-columns:minmax(0,1fr);}.board-clues-layout>.word-clues-panel{position:static;max-height:none;overflow:visible;}}
+</style>
+</body></html>
 <style id="requested-readability-adjustments">
 .cell-count{top:auto!important;bottom:2px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5149b7!important;font-size:clamp(.5rem,.78vw,.64rem)!important;line-height:1!important;font-weight:850!important;opacity:1!important;text-shadow:0 1px 2px #fff,0 0 3px #fff!important}
 .cell-count.start-count{left:3px!important;right:auto!important}
