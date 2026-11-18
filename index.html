@@ -51,6 +51,7 @@ header{background:linear-gradient(125deg,#142d43 0%,#1e526c 58%,#287c83 100%);bo
 .account-content{padding-top:14px}
 .account-intro{margin:0 0 12px;color:var(--muted);font-size:.92rem}
 .account-form{display:grid;gap:7px;max-width:440px}
+.account-form[hidden]{display:none!important}
 .account-form label{font-size:.85rem;font-weight:650;color:#38586a}
 .account-form input{width:100%;border:1px solid #cbd9df;border-radius:9px;padding:10px 11px;font:inherit;background:#fff;color:var(--ink)}
 .account-form input:focus{outline:2px solid #9dcbd0;border-color:var(--accent)}
@@ -428,74 +429,118 @@ async function restoreCloudProgress(user){
 }
 async function initCloudAuth(){
   const status=document.getElementById('accountStatus');
-  if(!window.supabase||!window.supabase.createClient){
-    if(status)status.textContent='Cloud nicht erreichbar';
-    showAccountMessage('Die Anmeldekomponente konnte nicht geladen werden. Bitte Internetverbindung prüfen.',true);return;
-  }
-  cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-  const accountDetails=null;
-  document.getElementById('forgotPasswordButton').addEventListener('click',async()=>{
-    const email=document.getElementById('accountEmail').value.trim();
-    if(!email){showAccountMessage('Bitte zuerst deine E-Mail-Adresse eingeben.',true);document.getElementById('accountEmail').focus();return;}
-    const btn=document.getElementById('forgotPasswordButton');btn.disabled=true;
-    const {error}=await cloudClient.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
-    btn.disabled=false;
-    if(error)showAccountMessage('Die E-Mail zum Zurücksetzen konnte nicht gesendet werden: '+error.message,true);
-    else showAccountMessage('Wenn für diese Adresse ein Konto besteht, erhältst du eine E-Mail mit einem Link zum Zurücksetzen des Passworts.');
-  });
-  document.getElementById('passwordResetForm').addEventListener('submit',async e=>{
-    e.preventDefault();const password=document.getElementById('newAccountPassword').value;
-    if(password.length<8){showAccountMessage('Das Passwort muss mindestens 8 Zeichen haben.',true);return;}
-    const {data,error}=await cloudClient.auth.updateUser({password});
-    if(error){showAccountMessage('Das Passwort konnte nicht geändert werden: '+error.message,true);return;}
-    document.getElementById('passwordResetForm').hidden=true;
-    document.getElementById('accountSignedOut').hidden=true;
-    showAccountUser(data.user||cloudUser);showAccountMessage('Passwort geändert. Du kannst das Spiel jetzt wie gewohnt weiterspielen.');
-    if(data.user)await restoreCloudProgress(data.user);
-  });
-  document.getElementById('accountForm').addEventListener('submit',async e=>{
-    e.preventDefault();
-    const email=document.getElementById('accountEmail').value.trim();
-    const password=document.getElementById('accountPassword').value;
-    const btn=document.getElementById('signInButton');btn.disabled=true;
-    const {data,error}=await cloudClient.auth.signInWithPassword({email,password});
-    btn.disabled=false;
-    if(error){showAccountMessage(error.message,true);return;}
-    if(data.user)await restoreCloudProgress(data.user);
-  });
-  document.getElementById('signUpButton').addEventListener('click',async()=>{
-    const email=document.getElementById('accountEmail').value.trim();
-    const password=document.getElementById('accountPassword').value;
-    if(!email||password.length<8){showAccountMessage('Bitte E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben.',true);return;}
-    const btn=document.getElementById('signUpButton');btn.disabled=true;
-    const {data,error}=await cloudClient.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('#')[0]}});
-    btn.disabled=false;
-    if(error){showAccountMessage(error.message,true);return;}
-    if(data.session&&data.user)await restoreCloudProgress(data.user);
-    else showAccountMessage('Fast geschafft: Bitte bestätige deine E-Mail-Adresse. Danach kannst du dich hier anmelden.');
-  });
-  document.getElementById('signOutButton').addEventListener('click',async()=>{
-    const {error}=await cloudClient.auth.signOut();
-    if(error){showAccountMessage(error.message,true);return;}
-    cloudReady=false;cloudUser=null;cloudUserId=null;showAccountUser(null);
-    showAccountMessage('Abgemeldet. Dein lokaler Spielstand bleibt auf diesem Gerät erhalten.');
-  });
-  cloudClient.auth.onAuthStateChange((event,session)=>{
-    if(event==='PASSWORD_RECOVERY'){
-      if(accountDetails)accountDetails.open=true;
-      document.getElementById('accountSignedOut').hidden=true;
-      document.getElementById('accountSignedIn').hidden=true;
-      document.getElementById('passwordResetForm').hidden=false;
-      showAccountMessage('Bitte vergib jetzt ein neues Passwort.');
+  try{
+    if(!window.supabase||!window.supabase.createClient){
+      if(status)status.textContent='Cloud nicht erreichbar';
+      showAccountMessage('Die Anmeldekomponente konnte nicht geladen werden. Bitte Internetverbindung prüfen und die Seite neu laden.',true);
       return;
     }
-    if(session?.user)setTimeout(()=>restoreCloudProgress(session.user),0);
-    else if(event==='SIGNED_OUT'){cloudReady=false;cloudUser=null;cloudUserId=null;showAccountUser(null);}
-  });
-  const {data:{session}}=await cloudClient.auth.getSession();
-  if(session?.user)await restoreCloudProgress(session.user);
+    cloudClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+    const forgotButton=document.getElementById('forgotPasswordButton');
+    forgotButton.addEventListener('click',async()=>{
+      const email=document.getElementById('accountEmail').value.trim();
+      if(!email){showAccountMessage('Bitte zuerst deine E-Mail-Adresse eingeben.',true);document.getElementById('accountEmail').focus();return;}
+      forgotButton.disabled=true;
+      showAccountMessage('Die Rücksetzungs-Mail wird angefordert …');
+      try{
+        const {error}=await cloudClient.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
+        if(error)showAccountMessage('Die Rücksetzungs-Mail konnte nicht angefordert werden: '+error.message,true);
+        else showAccountMessage('Anfrage abgeschickt. Falls für diese Adresse ein Konto besteht, sollte eine E-Mail eintreffen. Bitte auch den Spam-Ordner prüfen.');
+      }catch(error){showAccountMessage('Fehler beim Anfordern der Rücksetzungs-Mail: '+(error?.message||String(error)),true);}
+      finally{forgotButton.disabled=false;}
+    });
+    document.getElementById('passwordResetForm').addEventListener('submit',async e=>{
+      e.preventDefault();
+      const password=document.getElementById('newAccountPassword').value;
+      if(password.length<8){showAccountMessage('Das neue Passwort muss mindestens 8 Zeichen haben.',true);return;}
+      const btn=e.submitter||document.querySelector('#passwordResetForm button[type="submit"]');
+      if(btn)btn.disabled=true;
+      showAccountMessage('Das neue Passwort wird gespeichert …');
+      try{
+        const {data,error}=await cloudClient.auth.updateUser({password});
+        if(error){showAccountMessage('Das Passwort konnte nicht geändert werden: '+error.message,true);return;}
+        document.getElementById('passwordResetForm').hidden=true;
+        document.getElementById('passwordResetForm').classList.remove('recovery-active');
+        document.getElementById('accountSignedOut').hidden=true;
+        showAccountUser(data.user||cloudUser);
+        showAccountMessage('Passwort geändert. Dein Konto ist angemeldet; der Spielstand wird geladen.');
+        if(data.user)await restoreCloudProgress(data.user);
+      }catch(error){showAccountMessage('Fehler beim Speichern des Passworts: '+(error?.message||String(error)),true);}
+      finally{if(btn)btn.disabled=false;}
+    });
+    document.getElementById('accountForm').addEventListener('submit',async e=>{
+      e.preventDefault();
+      const email=document.getElementById('accountEmail').value.trim();
+      const password=document.getElementById('accountPassword').value;
+      const btn=document.getElementById('signInButton');
+      btn.disabled=true;
+      showAccountMessage('Anmeldung läuft …');
+      try{
+        const {data,error}=await cloudClient.auth.signInWithPassword({email,password});
+        if(error){showAccountMessage('Anmeldung fehlgeschlagen: '+error.message,true);return;}
+        if(data.user)await restoreCloudProgress(data.user);
+        else showAccountMessage('Anmeldung wurde bestätigt, aber es wurde kein Benutzerkonto zurückgegeben.',true);
+      }catch(error){showAccountMessage('Anmeldung fehlgeschlagen: '+(error?.message||String(error)),true);}
+      finally{btn.disabled=false;}
+    });
+    document.getElementById('signUpButton').addEventListener('click',async()=>{
+      const email=document.getElementById('accountEmail').value.trim();
+      const password=document.getElementById('accountPassword').value;
+      if(!email||password.length<8){showAccountMessage('Bitte E-Mail und ein Passwort mit mindestens 8 Zeichen eingeben.',true);return;}
+      const btn=document.getElementById('signUpButton');btn.disabled=true;
+      showAccountMessage('Konto wird angelegt …');
+      try{
+        const {data,error}=await cloudClient.auth.signUp({email,password,options:{emailRedirectTo:location.href.split('#')[0]}});
+        if(error){showAccountMessage('Konto konnte nicht angelegt werden: '+error.message,true);return;}
+        if(data.session&&data.user)await restoreCloudProgress(data.user);
+        else showAccountMessage('Konto-Anfrage abgeschickt. Bitte prüfe deine E-Mails zur Bestätigung.');
+      }catch(error){showAccountMessage('Konto konnte nicht angelegt werden: '+(error?.message||String(error)),true);}
+      finally{btn.disabled=false;}
+    });
+    document.getElementById('signOutButton').addEventListener('click',async()=>{
+      try{
+        const {error}=await cloudClient.auth.signOut();
+        if(error){showAccountMessage('Abmelden fehlgeschlagen: '+error.message,true);return;}
+        cloudReady=false;cloudUser=null;cloudUserId=null;showAccountUser(null);
+        showAccountMessage('Abgemeldet. Dein lokaler Spielstand bleibt auf diesem Gerät erhalten.');
+      }catch(error){showAccountMessage('Abmelden fehlgeschlagen: '+(error?.message||String(error)),true);}
+    });
+    cloudClient.auth.onAuthStateChange((event,session)=>{
+      if(event==='PASSWORD_RECOVERY'){
+        document.getElementById('accountSignedOut').hidden=true;
+        document.getElementById('accountSignedIn').hidden=true;
+        document.getElementById('passwordResetForm').hidden=false;
+        document.getElementById('passwordResetForm').classList.add('recovery-active');
+        showAccountMessage('Der Link ist gültig. Bitte vergib jetzt dein neues Passwort.');
+        document.getElementById('newAccountPassword').focus();
+        return;
+      }
+      if(session?.user)setTimeout(()=>restoreCloudProgress(session.user),0);
+      else if(event==='SIGNED_OUT'){cloudReady=false;cloudUser=null;cloudUserId=null;showAccountUser(null);}
+    });
+    const {data:{session}}=await cloudClient.auth.getSession();
+    if(session?.user)await restoreCloudProgress(session.user);
+  }catch(error){
+    if(status)status.textContent='Anmeldung nicht bereit';
+    showAccountMessage('Die Anmeldung konnte nicht initialisiert werden: '+(error?.message||String(error)),true);
+  }
 }
 
+// Defensive auth bootstrap: never allow a silent native form submission/reload.
+const resetFormEl=document.getElementById('passwordResetForm');
+resetFormEl.hidden=true;
+resetFormEl.classList.remove('recovery-active');
+document.getElementById('accountForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!cloudClient){e.stopImmediatePropagation();showAccountMessage('Anmeldung noch nicht bereit. Bitte Seite neu laden. Falls die Meldung bleibt, blockiert der Browser möglicherweise die Supabase-Bibliothek.',true);}
+},true);
+resetFormEl.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!cloudClient){e.stopImmediatePropagation();showAccountMessage('Die Passwortfunktion ist noch nicht bereit. Bitte Seite neu laden.',true);}
+},true);
+document.getElementById('forgotPasswordButton').addEventListener('click',e=>{
+  if(!cloudClient){e.stopImmediatePropagation();showAccountMessage('Die Passwortfunktion konnte nicht geladen werden. Bitte Seite neu laden.',true);}
+},true);
 drawGrid();update();
 initCloudAuth();
 </script></body></html>
@@ -503,11 +548,12 @@ initCloudAuth();
 .cell-count{top:auto!important;bottom:2px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5149b7!important;font-size:clamp(.5rem,.78vw,.64rem)!important;line-height:1!important;font-weight:850!important;opacity:1!important;text-shadow:0 1px 2px #fff,0 0 3px #fff!important}
 .cell-count.start-count{left:3px!important;right:auto!important}
 .cell-count.frequency-count{right:3px!important;left:auto!important;color:#168b87!important;background:transparent!important}
-.grid{column-gap:9px!important;row-gap:4px!important}
+.grid{width:min(100%,700px)!important;max-width:700px!important;column-gap:9px!important;row-gap:4px!important}
 @media(max-width:600px){.grid{column-gap:6px!important;row-gap:3px!important}}
 .hint-clue-group{margin:0 0 9px!important;padding:0!important}
 .hint-clue-group:last-child{margin-bottom:0!important}
 .hint-clue-group strong{color:#5149b7;white-space:nowrap}
 .account-reset-link{background:transparent!important;color:#5149b7!important;border:0!important;padding:6px 0!important;text-decoration:underline;font-weight:650!important}
 #passwordResetForm{margin-top:12px;padding-top:12px;border-top:1px solid #e3e7f0}
+#passwordResetForm:not(.recovery-active){display:none!important}
 </style>
