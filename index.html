@@ -308,7 +308,6 @@ wireFoundWordList();
 function gridHintCounts(remaining){
  const starts=new Map(),uses=new Map(),grid=BOARD.grid;
  for(const word of remaining){
-  if(!remainingSet.has(word))continue;
   const footprint=findWordFootprint(grid,word);
   footprint.starts.forEach(idx=>starts.set(idx,(starts.get(idx)||0)+1));
   footprint.cells.forEach(idx=>uses.set(idx,(uses.get(idx)||0)+1));
