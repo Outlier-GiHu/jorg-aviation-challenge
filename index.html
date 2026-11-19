@@ -171,11 +171,9 @@ footer{color:#7b8298!important;padding:22px!important}
 </style></head><body>
 <header><h1>Jörg's Aviation and Travel Challenge</h1></header>
 <main class="wrap">
-<div class="board-clues-layout">
 <section class="panel"><div class="topline"><strong>One big word hunt</strong><div class="stats" id="stats">0 / 77 words found</div></div><div class="bar"><div id="progress"></div></div>
 <div class="board-scroll"><div class="grid" id="grid" aria-label="Letter grid"></div></div><div class="gridstatus" id="status" aria-live="polite"> </div></section>
 <section class="panel word-clues-panel"><h2 style="font-size:1.1rem;margin:0 0 12px">20% — Word Clues</h2><p class="clue-intro">The clues are grouped by word length. The letter counts in the grid show where remaining words start and which squares they use.</p><div id="hint20" class="locked">Unlocks after 16 words.</div></section>
-</div>
 <section class="panel"><h2 style="font-size:1.08rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked"> </span></div></section>
 
 
@@ -310,6 +308,7 @@ wireFoundWordList();
 function gridHintCounts(remaining){
  const starts=new Map(),uses=new Map(),grid=BOARD.grid;
  for(const word of remaining){
+  if(!remainingSet.has(word))continue;
   const footprint=findWordFootprint(grid,word);
   footprint.starts.forEach(idx=>starts.set(idx,(starts.get(idx)||0)+1));
   footprint.cells.forEach(idx=>uses.set(idx,(uses.get(idx)||0)+1));
@@ -336,7 +335,7 @@ function renderWordClues(words,withBoard=false){
  for(const item of words){const word=typeof item==='string'?item:item.word;const n=word.length;if(!groups.has(n))groups.set(n,[]);groups.get(n).push(typeof item==='string'?{word}:{word,board:item.board});}
  return [...groups.keys()].sort((a,b)=>a-b).map(n=>{
   const entries=groups.get(n).sort((a,b)=>a.word.localeCompare(b.word));
-  const clues=entries.map(x=>{const shown=found.has(x.word)?x.word:wordClue(x.word);return `<span>${shown}${withBoard?` — Board ${x.board+1}`:''}</span>`}).join(' · ');
+  const clues=entries.map(x=>`${wordClue(x.word)}${withBoard?` — Board ${x.board+1}`:''}`).join(' · ');
   return `<p class="hint-clue-group"><strong>${n} letters:</strong> ${clues}</p>`;
  }).join('')||'All words found!';
 }
@@ -346,7 +345,7 @@ function update(){
  refreshGridCounts(remaining);
  $('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`;
  $('progress').style.width=pct+'%';
- if(n>=16){$('hint20').className='';$('hint20').innerHTML=renderWordClues(WORDS)}
+ if(n>=16){$('hint20').className='';$('hint20').innerHTML=renderWordClues(remaining)}
  $('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">No words found yet.</span>';
  applyWordHighlight();
  if(n===TOTAL){$('complete').style.display='block';$('complete').scrollIntoView({behavior:'smooth',block:'center'})}
@@ -569,23 +568,7 @@ window.supabaseLibraryReady.then(ready => {
     showAccountMessage('Die Supabase-Bibliothek konnte über beide Download-Adressen nicht geladen werden. Bitte prüfe, ob dein Browser oder ein Netzwerkfilter diese Adressen blockiert.', true);
   }
 });
-</script>
-<style id="word-clues-beside-board">
-/* Layout-only change: keep the clue panel beside the board on wide screens. */
-.board-clues-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(285px,0.58fr);align-items:start;gap:18px;width:100%;}
-.board-clues-layout>.panel{min-width:0;margin-top:0!important;}
-.board-clues-layout>.word-clues-panel{position:sticky;top:14px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;}
-@media(max-width:900px){.board-clues-layout{grid-template-columns:minmax(0,1fr);}.board-clues-layout>.word-clues-panel{position:static;max-height:none;overflow:visible;}}
-</style>
-
-<style id="word-clues-width-balance">
-@media(min-width:901px){
-  .board-clues-layout{grid-template-columns:minmax(0,1fr) minmax(285px,.44fr)!important}
-  .board-clues-layout .grid{width:min(100%,780px)!important;max-width:780px!important}
-}
-</style>
-
-</body></html>
+</script></body></html>
 <style id="requested-readability-adjustments">
 .cell-count{top:auto!important;bottom:2px!important;min-width:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#5149b7!important;font-size:clamp(.5rem,.78vw,.64rem)!important;line-height:1!important;font-weight:850!important;opacity:1!important;text-shadow:0 1px 2px #fff,0 0 3px #fff!important}
 .cell-count.start-count{left:3px!important;right:auto!important}
@@ -600,17 +583,9 @@ window.supabaseLibraryReady.then(ready => {
 #passwordResetForm:not(.recovery-active){display:none!important}
 </style>
 
-<style id="large-board-counter-spacing-fix">
-/* Give the 22-column board enough room; keep the two counters in separate corners. */
-.wrap{max-width:1160px!important}
-.board-clues-layout{grid-template-columns:minmax(0,1fr) minmax(285px,.58fr)!important}
-.board-clues-layout>.panel:first-child{min-width:0!important}
-.board-clues-layout .grid{width:min(100%,700px)!important;max-width:700px!important;column-gap:4px!important;row-gap:4px!important}
-.board-clues-layout .cell{position:relative!important;overflow:visible!important}
-.board-clues-layout .cell-letter{position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;line-height:1!important;pointer-events:none!important}
-.board-clues-layout .cell-count{position:absolute!important;top:auto!important;bottom:2px!important;z-index:2!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;font-size:clamp(6px,.62vw,8px)!important;line-height:1!important;font-weight:900!important;opacity:1!important;text-shadow:0 0 2px #fff,0 0 3px #fff!important;pointer-events:none!important}
-.board-clues-layout .cell-count.start-count{left:2px!important;right:auto!important;color:#5149b7!important}
-.board-clues-layout .cell-count.frequency-count{right:2px!important;left:auto!important;color:#078b83!important}
-@media(max-width:900px){.wrap{max-width:950px!important}.board-clues-layout{grid-template-columns:minmax(0,1fr)!important}.board-clues-layout .grid{column-gap:4px!important}}
+<style id="word-clues-matrix-font-balance">
+/* Slightly smaller clues, more legible matrix letters and counters. */
+.hint-clue-group{font-size:.75rem!important;line-height:1.55!important}
+.board-clues-layout .cell-letter{font-size:clamp(.78rem,2vw,1.15rem)!important}
+.board-clues-layout .cell-count{font-size:clamp(8px,.9vw,12px)!important}
 </style>
-
