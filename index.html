@@ -214,6 +214,7 @@ footer{color:#7b8298!important;padding:22px!important}
 .board-clues-layout .cell-count.frequency-count{right:2px!important;left:auto!important;color:#078b83!important}
 @media(max-width:900px){.wrap{max-width:950px!important}.board-clues-layout{grid-template-columns:minmax(0,1fr)!important}.board-clues-layout .grid{column-gap:4px!important}}
 </style>
+<style>.clue-word{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px;border-radius:3px}.clue-word:hover,.clue-word.clue-word-active{background:#e4f5ef;color:#145b45}</style>
 </head><body>
 <header><h1>Jörg's Aviation and Travel Challenge</h1></header>
 <main class="wrap">
@@ -335,7 +336,7 @@ function findWordFootprint(grid,word){
  if(reverse!==word){const reversed=scan(reverse);reversed.starts.forEach(x=>result.starts.add(x));reversed.cells.forEach(x=>result.cells.add(x));}
  return result;
 }
-function findWordPath(grid,word){
+function findRawWordPath(grid,word){
  const rows=grid.length,cols=grid[0].length,used=new Uint8Array(rows*cols),path=[];let answer=null;
  function walk(r,c,pos){if(answer)return;const idx=r*cols+c;if(used[idx]||grid[r][c]!==word[pos])return;used[idx]=1;path.push(idx);
   if(pos===word.length-1)answer=path.slice();
@@ -343,16 +344,24 @@ function findWordPath(grid,word){
   path.pop();used[idx]=0;
  }
  for(let r=0;r<rows&&!answer;r++)for(let c=0;c<cols&&!answer;c++)if(grid[r][c]===word[0])walk(r,c,0);
- if(!answer){const rev=[...word].reverse().join('');if(rev!==word)return findWordPath(grid,rev)}
- return answer;
+ if(!answer){const rev=[...word].reverse().join('');if(rev!==word)return findRawWordPath(grid,rev)}return answer;
+}
+function findWordPath(grid,word,wordList=[]){
+ // Prefer a shared prefix path when this clue is also the beginning of a longer target word.
+ const longer=wordList.filter(w=>w.length>word.length&&w.startsWith(word)).sort((a,b)=>b.length-a.length);
+ for(const candidate of longer){const full=findRawWordPath(grid,candidate);if(full)return full.slice(0,word.length)}
+ return findRawWordPath(grid,word);
 }
 function applyWordHighlight(){
  const word=hoveredWord||pinnedWord;document.querySelectorAll('#grid .cell').forEach(cell=>cell.classList.remove('word-highlight'));
  document.querySelectorAll('#foundlist .wordchip').forEach(chip=>chip.classList.toggle('wordchip-active',chip.dataset.word===word));
- if(!word)return;const cells=findWordPath(BOARD.grid,word);if(cells)cells.forEach(idx=>{const cell=document.querySelector(`#grid .cell[data-r="${Math.floor(idx/BOARD.grid[0].length)}"][data-c="${idx%BOARD.grid[0].length}"]`);if(cell)cell.classList.add('word-highlight')});
+ document.querySelectorAll('#hint20 .clue-word').forEach(chip=>chip.classList.toggle('clue-word-active',chip.dataset.word===word));
+ if(!word)return;const cells=findWordPath(BOARD.grid,word,WORDS);if(cells)cells.forEach(idx=>{const cell=document.querySelector(`#grid .cell[data-r="${Math.floor(idx/BOARD.grid[0].length)}"][data-c="${idx%BOARD.grid[0].length}"]`);if(cell)cell.classList.add('word-highlight')});
 }
 function wireFoundWordList(){const list=$('foundlist');list.addEventListener('pointerover',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const chip=e.target.closest('.wordchip');if(!chip||chip.contains(e.relatedTarget))return;hoveredWord=chip.dataset.word;applyWordHighlight()});list.addEventListener('pointerout',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const chip=e.target.closest('.wordchip');if(!chip||chip.contains(e.relatedTarget))return;hoveredWord=null;applyWordHighlight()});list.addEventListener('click',e=>{const chip=e.target.closest('.wordchip');if(!chip)return;const word=chip.dataset.word;pinnedWord=pinnedWord===word?null:word;hoveredWord=null;applyWordHighlight();$('status').textContent=pinnedWord?word+' — shown in the grid.':'Grid highlight cleared.'});}
 wireFoundWordList();
+function wireWordClues(){const list=$('hint20');list.addEventListener('pointerover',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const clue=e.target.closest('.clue-word');if(!clue||clue.contains(e.relatedTarget))return;hoveredWord=clue.dataset.word;applyWordHighlight()});list.addEventListener('pointerout',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const clue=e.target.closest('.clue-word');if(!clue||clue.contains(e.relatedTarget))return;hoveredWord=null;applyWordHighlight()});list.addEventListener('click',e=>{const clue=e.target.closest('.clue-word');if(!clue)return;const word=clue.dataset.word;pinnedWord=pinnedWord===word?null:word;hoveredWord=null;applyWordHighlight();$('status').textContent=pinnedWord?word+' — shown in the grid.':'Grid highlight cleared.'})}
+wireWordClues();
 function gridHintCounts(remaining){
  const starts=new Map(),uses=new Map(),grid=BOARD.grid;
  for(const word of remaining){
@@ -382,7 +391,7 @@ function renderWordClues(words,withBoard=false){
  for(const item of words){const word=typeof item==='string'?item:item.word;const n=word.length;if(!groups.has(n))groups.set(n,[]);groups.get(n).push(typeof item==='string'?{word,found:false}:{word,found:!!item.found});}
  return [...groups.keys()].sort((a,b)=>a-b).map(n=>{
   const entries=groups.get(n).sort((a,b)=>a.word.localeCompare(b.word));
-  const clues=entries.map(x=>x.found?x.word:wordClue(x.word)).join(' · ');
+  const clues=entries.map(x=>`<span class=\"clue-word\" data-word=\"${x.word}\">${x.found?x.word:wordClue(x.word)}</span>`).join(' · ');
   return `<p class="hint-clue-group"><strong>${n} letters:</strong> ${clues}</p>`;
  }).join('')||'All words found!';
 }
