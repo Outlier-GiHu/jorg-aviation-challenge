@@ -215,11 +215,24 @@ footer{color:#7b8298!important;padding:22px!important}
 @media(max-width:900px){.wrap{max-width:950px!important}.board-clues-layout{grid-template-columns:minmax(0,1fr)!important}.board-clues-layout .grid{column-gap:4px!important}}
 </style>
 <style>.clue-word{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px;border-radius:3px}.clue-word:hover,.clue-word.clue-word-active{background:#e4f5ef;color:#145b45}</style>
+
+<style id="motivation-nuggets">
+.motivation-toast{position:fixed;z-index:9999;top:18px;left:50%;width:min(440px,calc(100vw - 28px));padding:15px 46px 15px 18px;border:1px solid #dedbff;border-radius:18px;background:linear-gradient(120deg,#fff 0%,#f5f3ff 55%,#edfffa 100%);box-shadow:0 14px 40px #28245b30;color:#302b65;text-align:center;font-weight:800;font-size:1rem;line-height:1.4;opacity:0;transform:translate(-50%,-18px) scale(.96);pointer-events:none;transition:opacity .22s ease,transform .22s ease;overflow:visible}
+.motivation-toast.show{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto}
+.motivation-toast .motivation-close{position:absolute;right:9px;top:7px;width:30px;height:30px;border:0;border-radius:50%;background:#e9e7fb;color:#4b438f;font-size:20px;line-height:1;cursor:pointer}
+.motivation-toast .motivation-sparks{position:absolute;inset:-9px;pointer-events:none;overflow:visible}
+.motivation-toast .motivation-sparks i{position:absolute;top:50%;left:50%;width:7px;height:10px;border-radius:2px;background:#e9b84d;animation:nugget-confetti .9s ease-out both}
+.motivation-toast .motivation-sparks i:nth-child(3n){background:#25aa9b}.motivation-toast .motivation-sparks i:nth-child(3n + 1){background:#7668dc}.motivation-toast .motivation-sparks i:nth-child(3n + 2){background:#f28b72}
+.motivation-toast .motivation-sparks i:nth-child(1){--dx:-145px;--dy:-32px;--rot:35deg}.motivation-toast .motivation-sparks i:nth-child(2){--dx:-105px;--dy:-48px;--rot:-45deg}.motivation-toast .motivation-sparks i:nth-child(3){--dx:-55px;--dy:-40px;--rot:65deg}.motivation-toast .motivation-sparks i:nth-child(4){--dx:45px;--dy:-45px;--rot:-30deg}.motivation-toast .motivation-sparks i:nth-child(5){--dx:100px;--dy:-42px;--rot:50deg}.motivation-toast .motivation-sparks i:nth-child(6){--dx:145px;--dy:-25px;--rot:-60deg}.motivation-toast .motivation-sparks i:nth-child(7){--dx:-135px;--dy:30px;--rot:-35deg}.motivation-toast .motivation-sparks i:nth-child(8){--dx:-75px;--dy:43px;--rot:40deg}.motivation-toast .motivation-sparks i:nth-child(9){--dx:70px;--dy:42px;--rot:-45deg}.motivation-toast .motivation-sparks i:nth-child(10){--dx:135px;--dy:28px;--rot:60deg}.motivation-toast .motivation-sparks i:nth-child(11){--dx:-20px;--dy:-52px;--rot:25deg}.motivation-toast .motivation-sparks i:nth-child(12){--dx:20px;--dy:52px;--rot:-25deg}
+@keyframes nugget-confetti{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--rot))}}
+@media(prefers-reduced-motion:reduce){.motivation-toast{transition:none}.motivation-toast .motivation-sparks i{animation:none;display:none}}
+</style>
 </head><body>
 <header><h1>Jörg's Aviation and Travel Challenge</h1></header>
+<div id="motivationToast" class="motivation-toast" role="status" aria-live="polite" hidden><span class="motivation-sparks" aria-hidden="true"></span><span class="motivation-message"></span><button type="button" class="motivation-close" aria-label="Close">×</button></div>
 <main class="wrap">
 <div class="board-clues-layout">
-<section class="panel"><div class="topline"><strong>One big word hunt</strong><div class="stats" id="stats">0 / 77 words found</div></div><div class="bar"><div id="progress"></div></div>
+<section class="panel"><div class="topline"><strong>One big word hunt</strong><div class="stats" id="stats">0 / 77 words found</div></div><div class="bar"><div id="progress"></div></div><div id="bonusStats" style="margin-top:6px;text-align:right;color:#805b13;font-size:.82rem;font-weight:700">★ 0 bonus words</div>
 <div class="board-scroll"><div class="grid" id="grid" aria-label="Letter grid"></div></div><div class="gridstatus" id="status" aria-live="polite"> </div></section>
 <section class="panel word-clues-panel"><h2 style="font-size:1.1rem;margin:0 0 12px">20% — Word Clues</h2><p class="clue-intro">The clues are grouped by word length. The letter counts in the grid show where remaining words start and which squares they use.</p><div id="hint20" class="locked">Unlocks after 16 words.</div></section>
 </div>
@@ -302,9 +315,9 @@ function drawGrid(){const el=$('grid');el.innerHTML='';BOARD.grid.forEach((row,r
 function addCell(r,c){const last=path[path.length-1];if(path.length>1&&path[path.length-2].r===r&&path[path.length-2].c===c){path.pop();paint();return}if(path.some(p=>p.r===r&&p.c===c))return;if(last&&Math.abs(last.r-r)<=1&&Math.abs(last.c-c)<=1){path.push({r,c});paint()}}
 function paint(){document.querySelectorAll('.cell').forEach(el=>el.classList.toggle('selected',path.some(p=>p.r===+el.dataset.r&&p.c===+el.dataset.c)));$('status').textContent=path.map(p=>BOARD.grid[p.r][p.c]).join('')}
 function finish(){if(!dragging)return;dragging=false;const raw=path.map(p=>BOARD.grid[p.r][p.c]).join(''),rev=[...raw].reverse().join(''),word=wordSet.has(raw)?raw:wordSet.has(rev)?rev:null;
- if(word&&!found.has(word)){found.add(word);$('status').textContent='✓ '+word+' — found!';update()}
+ if(word&&!found.has(word)){found.add(word);$('status').textContent='✓ '+word+' — found!';update(word)}
  else if(word){$('status').textContent=word+' is already found.'}
- else {const bonus=bonusWordSet.has(raw)?raw:bonusWordSet.has(rev)?rev:null;if(bonus&&bonus.length>=3){if(!bonusFound.has(bonus)){bonusFound.add(bonus);$('status').textContent='★ '+bonus+' — bonus word!';update()}else $('status').textContent=bonus+' is already counted as a bonus word.'}else if(raw.length>1){$('status').textContent=raw+' — '+(bonusDictionaryReady?'not on the list.':'not recognized yet; bonus dictionary is still loading.')}}
+ else {const bonus=bonusWordSet.has(raw)?raw:bonusWordSet.has(rev)?rev:null;if(bonus&&bonus.length>=3){if(!bonusFound.has(bonus)){bonusFound.add(bonus);$('status').textContent='★ '+bonus+' — bonus word!';celebrateNewBonusWord(bonusFound.size);update()}else $('status').textContent=bonus+' is already counted as a bonus word.'}else if(raw.length>1){$('status').textContent=raw+' — '+(bonusDictionaryReady?'not on the list.':'not recognized yet; bonus dictionary is still loading.')}}
  path=[];drawGrid()}
 let activePointer=null;
 let pinnedWord=null,hoveredWord=null;
@@ -395,11 +408,54 @@ function renderWordClues(words,withBoard=false){
   return `<p class="hint-clue-group"><strong>${n} letters:</strong> ${clues}</p>`;
  }).join('')||'All words found!';
 }
-function update(){
+
+let motivationTimer=null;
+const progressMilestones=[
+ [10,"10% complete — great start! 🌟"],[20,"20% complete — you're getting into the rhythm! ✨"],
+ [25,"A quarter of the words found — fantastic! 🎯"],[30,"30% complete — keep that momentum! 🚀"],
+ [40,"40% complete — you're making great progress! 💪"],[50,"Halfway there — brilliant work! 🥳"],
+ [60,"60% complete — more than halfway! 🌈"],[70,"70% complete — the finish line is coming into view! 🚀"],
+ [75,"Three quarters complete — what a run! 🎉"],[100,"Every word found — challenge completed! 🏆🎆"]
+];
+function showMotivationNugget(message){
+ const toast=$('motivationToast');if(!toast)return;
+ toast.querySelector('.motivation-message').textContent=message;
+ const sparks=toast.querySelector('.motivation-sparks');sparks.innerHTML=Array.from({length:12},()=>'<i></i>').join('');
+ toast.hidden=false;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');
+ if(motivationTimer)clearTimeout(motivationTimer);
+ motivationTimer=setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>{if(!toast.classList.contains('show'))toast.hidden=true},260)},3900);
+}
+function celebrateNewWord(word,currentCount){
+ const previousPercent=(currentCount-1)/TOTAL*100,currentPercent=currentCount/TOTAL*100;
+ const milestone=progressMilestones.find(([percent])=>previousPercent<percent&&currentPercent>=percent);
+ const targetWords=WORDS;
+ const sameLength=targetWords.filter(w=>w.length===word.length);
+ const lengthDone=sameLength.length>0&&sameLength.every(w=>found.has(w));
+ let messages=[];
+ if(milestone)messages.push(milestone[1]);
+ if(lengthDone)messages.push(`All ${word.length}-letter words found — one whole group completed! 🧩`);
+ if(messages.length)showMotivationNugget(messages.join(' '));
+}
+const bonusMilestones=[
+ [25,'25 bonus words — brilliant discoveries! ⭐'],
+ [50,'50 bonus words — you have a great eye for words! 🌟'],
+ [75,'75 bonus words — bonus-word champion! 🏅'],
+ [100,'100 bonus words — an extraordinary bonus collection! 🏆']
+];
+function celebrateNewBonusWord(currentCount){
+ const milestone=bonusMilestones.find(([count])=>currentCount-1<count&&currentCount>=count);
+ if(milestone)showMotivationNugget(milestone[1]);
+}
+document.querySelector('#motivationToast .motivation-close').addEventListener('click',()=>{const toast=$('motivationToast');toast.classList.remove('show');if(motivationTimer)clearTimeout(motivationTimer);setTimeout(()=>{if(!toast.classList.contains('show'))toast.hidden=true},260)});
+
+function update(newlyFoundWord=null){
  saveGame();
- const n=found.size,pct=Math.round(n/TOTAL*100),remaining=WORDS.filter(w=>!found.has(w));
+ const n=found.size;
+ if(newlyFoundWord)celebrateNewWord(newlyFoundWord,n);
+ const pct=Math.round(n/TOTAL*100),remaining=WORDS.filter(w=>!found.has(w));
  refreshGridCounts(remaining);
- $('stats').textContent=`${n} / ${TOTAL} words found · ${pct}% · ${bonusFound.size} bonus`;
+ $('stats').textContent=`${n} / ${TOTAL} words found · ${pct}%`;
+ $('bonusStats').textContent=`★ ${bonusFound.size} bonus words`;
  $('progress').style.width=pct+'%';
  if(n>=16){$('hint20').className='';$('hint20').innerHTML=renderWordClues(WORDS.map(word=>({word,found:found.has(word)})))}
  $('foundlist').innerHTML=[...found].sort().map(w=>`<button type="button" class="wordchip" data-word="${w}" aria-label="Show ${w} in the grid">${w}</button>`).join('')+[...bonusFound].sort().map(w=>`<button type="button" class="wordchip bonuschip" data-word="${w}" aria-label="Show bonus word ${w} in the grid">★ ${w}</button>`).join('')||'<span class="locked">No words found yet.</span>';
