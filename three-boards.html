@@ -196,12 +196,25 @@ footer{color:#7b8298!important;padding:22px!important}
 @keyframes nugget-confetti{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--rot))}}
 @media(prefers-reduced-motion:reduce){.motivation-toast{transition:none}.motivation-toast .motivation-sparks i{animation:none;display:none}}
 </style>
+
+<style id="word-reveal-dialog">
+.word-reveal-backdrop{position:fixed;inset:0;z-index:10000;background:#17203380;display:flex;align-items:center;justify-content:center;padding:20px}
+.word-reveal-backdrop[hidden]{display:none}.word-reveal-dialog{width:min(430px,100%);background:#fff;border-radius:16px;padding:22px;box-shadow:0 18px 55px #10182855;color:#263247}
+.word-reveal-dialog p{margin:0 0 16px;line-height:1.45}.word-reveal-dialog label{display:flex;gap:9px;align-items:center;font-size:.9rem;margin:0 0 18px}
+.word-reveal-actions{display:flex;justify-content:flex-end;gap:10px}.word-reveal-actions button{border:0;border-radius:9px;padding:9px 15px;cursor:pointer;font-weight:700}
+.word-reveal-actions .confirm{background:#5149b7;color:white}.word-reveal-actions .cancel{background:#edf0f5;color:#344054}
+</style>
 </head><body><header><h1>Jörg's Aviation and Travel Challenge</h1></header>
-<div id="motivationToast" class="motivation-toast" role="status" aria-live="polite" hidden><span class="motivation-sparks" aria-hidden="true"></span><span class="motivation-message"></span><button type="button" class="motivation-close" aria-label="Close">×</button></div><main class="wrap">
+<div id="motivationToast" class="motivation-toast" role="status" aria-live="polite" hidden><span class="motivation-sparks" aria-hidden="true"></span><span class="motivation-message"></span><button type="button" class="motivation-close" aria-label="Close">×</button></div>
+<div id="wordRevealBackdrop" class="word-reveal-backdrop" hidden><div class="word-reveal-dialog" role="dialog" aria-modal="true" aria-labelledby="wordRevealQuestion">
+<p id="wordRevealQuestion">Would you really like to have this word shown in the grid?</p>
+<label><input type="checkbox" id="wordRevealDontAsk"> Don't ask this again</label>
+<div class="word-reveal-actions"><button type="button" class="cancel" id="wordRevealCancel">Cancel</button><button type="button" class="confirm" id="wordRevealConfirm">Show word</button></div>
+</div></div><main class="wrap">
 
 <div class="board-clues-layout">
 <section class="panel"><div class="topline"><div class="tabs" id="tabs"></div><div class="stats" id="stats"></div></div><div class="bar"><div id="progress"></div></div><div id="bonusStats" style="margin-top:6px;text-align:right;color:#805b13;font-size:.82rem;font-weight:700">★ 0 bonus words</div><div class="grid" id="grid" aria-label="Letter grid"></div><div class="gridstatus" id="status" aria-live="polite">Find a word to get started!</div></section>
-<section class="panel word-clues-panel"><h2 style="font-size:1.1rem;margin:0 0 12px">20% — Word Clues</h2><p class="clue-intro">The clues are grouped by word length. The letter counts in the grid show where remaining words start and which squares they use. <span class="board-legend">(1) / (2) / (3) = board number</span></p><div id="hint20" class="locked">Unlocks after 16 words.</div></section>
+<section class="panel word-clues-panel"><h2 style="font-size:1.1rem;margin:0 0 12px">20% — Word Clues</h2><p class="clue-intro">Found words are highlighted in the grid. To reveal an unfound word, double-click it in the Word Clues list. The clues are grouped by word length. The letter counts in the grid show where remaining words start and which squares they use. <span class="board-legend">(1) / (2) / (3) = board number</span></p><div id="hint20" class="locked">Unlocks after 16 words.</div></section>
 </div>
 <section class="panel"><h2 style="font-size:1.1rem;margin:0 0 6px">Words you've found</h2><p style="font-size:.82rem;color:var(--muted);margin:0 0 10px">★ Bonus words are counted separately and do not change the target-word progress.</p><p class="found-help">Move the mouse over a found word or click it to show its path in the grid.</p><div class="foundlist" id="foundlist"><span class="locked">Your discoveries will appear here.</span></div></section>
 
@@ -317,7 +330,26 @@ function applyWordHighlight(){
 }
 function wireFoundWordList(){const list=$('foundlist');list.addEventListener('pointerover',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const chip=e.target.closest('.wordchip');if(!chip||chip.contains(e.relatedTarget))return;hoveredWord=chip.dataset.word;applyWordHighlight()});list.addEventListener('pointerout',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const chip=e.target.closest('.wordchip');if(!chip||chip.contains(e.relatedTarget))return;hoveredWord=null;applyWordHighlight()});list.addEventListener('click',e=>{const chip=e.target.closest('.wordchip');if(!chip)return;const word=chip.dataset.word;pinnedWord=pinnedWord===word?null:word;hoveredWord=null;applyWordHighlight();$('status').textContent=pinnedWord?word+' — shown on Board '+(active+1)+'.':'Grid highlight cleared.'});}
 wireFoundWordList();
-function wireWordClues(){const list=$('hint20');list.addEventListener('pointerover',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const clue=e.target.closest('.clue-word');if(!clue||clue.contains(e.relatedTarget))return;hoveredWord=clue.dataset.word;applyWordHighlight()});list.addEventListener('pointerout',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const clue=e.target.closest('.clue-word');if(!clue||clue.contains(e.relatedTarget))return;hoveredWord=null;applyWordHighlight()});list.addEventListener('click',e=>{const clue=e.target.closest('.clue-word');if(!clue)return;const word=clue.dataset.word;pinnedWord=pinnedWord===word?null:word;hoveredWord=null;applyWordHighlight();$('status').textContent=pinnedWord?word+' — shown on Board '+(active+1)+'.':'Grid highlight cleared.'})}
+let pendingRevealWord=null;
+function revealUnfoundWord(word){
+ const boardIndex=BOARDS.findIndex(b=>b.words.includes(word));if(boardIndex<0)return;
+ const cells=findWordPath(BOARDS[boardIndex].grid,word,BOARDS[boardIndex].words);if(!cells)return;
+ active=boardIndex;tabs();grid();pinnedWord=word;hoveredWord=null;applyWordHighlight();
+ $('status').textContent=word+' — shown on Board '+(active+1)+'. It is not marked as found.';
+}
+function askToRevealWord(word){
+ pendingRevealWord=word;if(localStorage.getItem('wordRevealDontAsk')==='yes'){revealUnfoundWord(word);return;}
+ $('wordRevealDontAsk').checked=false;$('wordRevealBackdrop').hidden=false;
+}
+$('wordRevealCancel').addEventListener('click',()=>{$('wordRevealBackdrop').hidden=true;pendingRevealWord=null});
+$('wordRevealConfirm').addEventListener('click',()=>{if($('wordRevealDontAsk').checked)localStorage.setItem('wordRevealDontAsk','yes');$('wordRevealBackdrop').hidden=true;if(pendingRevealWord)revealUnfoundWord(pendingRevealWord);pendingRevealWord=null});
+function wireWordClues(){
+ const list=$('hint20');
+ list.addEventListener('pointerover',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const clue=e.target.closest('.clue-word');if(!clue||clue.contains(e.relatedTarget)||!found.has(clue.dataset.word))return;hoveredWord=clue.dataset.word;applyWordHighlight()});
+ list.addEventListener('pointerout',e=>{if(e.pointerType&&e.pointerType!=='mouse')return;const clue=e.target.closest('.clue-word');if(!clue||clue.contains(e.relatedTarget))return;hoveredWord=null;applyWordHighlight()});
+ list.addEventListener('click',e=>{const clue=e.target.closest('.clue-word');if(!clue)return;const word=clue.dataset.word;if(!found.has(word))return;pinnedWord=pinnedWord===word?null:word;hoveredWord=null;applyWordHighlight();$('status').textContent=pinnedWord?word+' — shown on Board '+(active+1)+'.':'Grid highlight cleared.'});
+ list.addEventListener('dblclick',e=>{const clue=e.target.closest('.clue-word');if(clue&&!found.has(clue.dataset.word))askToRevealWord(clue.dataset.word)});
+}
 wireWordClues();
 function gridHintCounts(remaining){
  const starts=new Map(),uses=new Map(),grid=BOARDS[active].grid,remainingSet=new Set(remaining);
@@ -362,7 +394,7 @@ const progressMilestones=[
  [60,"60% complete — more than halfway! 🌈"],[70,"70% complete — the finish line is coming into view! 🚀"],
  [75,"Three quarters complete — what a run! 🎉"],[100,"Every word found — challenge completed! 🏆🎆"]
 ];
-function showMotivationNugget(message,duration=3900){
+function showMotivationNugget(message,duration=6000){
  const toast=$('motivationToast');if(!toast)return;
  toast.querySelector('.motivation-message').textContent=message;
  const sparks=toast.querySelector('.motivation-sparks');sparks.innerHTML=Array.from({length:12},()=>'<i></i>').join('');
@@ -379,13 +411,13 @@ function celebrateNewWord(word,currentCount){
  let messages=[];
  if(milestone)messages.push(milestone[1]);
  if(lengthDone)messages.push(`All ${word.length}-letter words found — one whole group completed! 🧩`);
- if(messages.length)showMotivationNugget(messages.join(' '));
+ if(messages.length){const special=!!milestone&&(milestone[0]===50||milestone[0]===100);showMotivationNugget(messages.join(' '),special?8000:6000);}
 }
 function celebrateNewBonusWord(currentCount){
  if(currentCount>0&&currentCount%25===0){
   const isSpecialMilestone=currentCount%50===0;
   const message=currentCount===25?'25 bonus words — brilliant discoveries! ⭐':`${currentCount} bonus words — your bonus-word collection keeps growing! 🌟🎆`;
-  showMotivationNugget(message,isSpecialMilestone?5600:3900);
+  showMotivationNugget(message,6000);
  }
 }
 document.querySelector('#motivationToast .motivation-close').addEventListener('click',()=>{const toast=$('motivationToast');toast.classList.remove('show');if(motivationTimer)clearTimeout(motivationTimer);setTimeout(()=>{if(!toast.classList.contains('show'))toast.hidden=true},260)});
