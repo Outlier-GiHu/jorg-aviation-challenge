@@ -417,13 +417,13 @@ const progressMilestones=[
  [60,"60% complete — more than halfway! 🌈"],[70,"70% complete — the finish line is coming into view! 🚀"],
  [75,"Three quarters complete — what a run! 🎉"],[100,"Every word found — challenge completed! 🏆🎆"]
 ];
-function showMotivationNugget(message){
+function showMotivationNugget(message,duration=3900){
  const toast=$('motivationToast');if(!toast)return;
  toast.querySelector('.motivation-message').textContent=message;
  const sparks=toast.querySelector('.motivation-sparks');sparks.innerHTML=Array.from({length:12},()=>'<i></i>').join('');
  toast.hidden=false;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show');
  if(motivationTimer)clearTimeout(motivationTimer);
- motivationTimer=setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>{if(!toast.classList.contains('show'))toast.hidden=true},260)},3900);
+ motivationTimer=setTimeout(()=>{toast.classList.remove('show');setTimeout(()=>{if(!toast.classList.contains('show'))toast.hidden=true},260)},duration);
 }
 function celebrateNewWord(word,currentCount){
  const previousPercent=(currentCount-1)/TOTAL*100,currentPercent=currentCount/TOTAL*100;
@@ -436,15 +436,12 @@ function celebrateNewWord(word,currentCount){
  if(lengthDone)messages.push(`All ${word.length}-letter words found — one whole group completed! 🧩`);
  if(messages.length)showMotivationNugget(messages.join(' '));
 }
-const bonusMilestones=[
- [25,'25 bonus words — brilliant discoveries! ⭐'],
- [50,'50 bonus words — you have a great eye for words! 🌟'],
- [75,'75 bonus words — bonus-word champion! 🏅'],
- [100,'100 bonus words — an extraordinary bonus collection! 🏆']
-];
 function celebrateNewBonusWord(currentCount){
- const milestone=bonusMilestones.find(([count])=>currentCount-1<count&&currentCount>=count);
- if(milestone)showMotivationNugget(milestone[1]);
+ if(currentCount>0&&currentCount%25===0){
+  const isSpecialMilestone=currentCount%50===0;
+  const message=currentCount===25?'25 bonus words — brilliant discoveries! ⭐':`${currentCount} bonus words — your bonus-word collection keeps growing! 🌟🎆`;
+  showMotivationNugget(message,isSpecialMilestone?5600:3900);
+ }
 }
 document.querySelector('#motivationToast .motivation-close').addEventListener('click',()=>{const toast=$('motivationToast');toast.classList.remove('show');if(motivationTimer)clearTimeout(motivationTimer);setTimeout(()=>{if(!toast.classList.contains('show'))toast.hidden=true},260)});
 
